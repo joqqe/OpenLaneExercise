@@ -8,6 +8,6 @@ public class Offer
 	public Product Product { get; set; } = default!;
 	public ICollection<Bid> Bids { get; set; } = [];
 	public decimal StartingPrice { get; set; }
-	public DateTime OpensAt { get; set; }
-	public DateTime ClosesAt { get; set; }
+	public DateTimeOffset OpensAt { get; set; }
+	public DateTimeOffset ClosesAt { get; set; }
 }

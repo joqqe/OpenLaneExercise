@@ -1,7 +1,6 @@
-﻿namespace OpenLane.Api.Common.Interfaces
+﻿namespace OpenLane.Api.Common.Interfaces;
+
+public interface IHandler<TRequest, TResponse>
 {
-	public interface IHandler<TRequest, TResponse>
-	{
-		Task<TRequest> InvokeAsync(TResponse request);
-	}
+	Task<TResponse> InvokeAsync(TRequest request);
 }
