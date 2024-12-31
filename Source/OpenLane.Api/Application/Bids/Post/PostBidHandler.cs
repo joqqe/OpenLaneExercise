@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MassTransit;
+using Microsoft.EntityFrameworkCore;
+using OpenLane.Api.Application.Bids.Consumers;
 using OpenLane.Api.Common;
 using OpenLane.Api.Common.Interfaces;
 using OpenLane.Api.Domain;
@@ -11,10 +13,12 @@ public record PostBidRequest(Guid OfferObjectId, decimal Price, Guid User);
 public class PostBidHandler : IHandler<PostBidRequest, Result<Bid>>
 {
 	private readonly AppContext _appContext;
+	private readonly IBus _bus;
 
-	public PostBidHandler(AppContext appContext)
+	public PostBidHandler(AppContext appContext, IBus bus)
 	{
 		_appContext = appContext;
+		_bus = bus;
 	}
 
 	public async Task<Result<Bid>> InvokeAsync(PostBidRequest request)
@@ -39,6 +43,8 @@ public class PostBidHandler : IHandler<PostBidRequest, Result<Bid>>
 
 		await _appContext.Bids.AddAsync(newBid);
 		await _appContext.SaveChangesAsync();
+
+		await _bus.Send(new BidCreatedMessage());
 
 		return Result<Bid>.Success(newBid);
 	}

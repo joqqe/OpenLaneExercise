@@ -1,6 +1,7 @@
 using OpenLane.Api.Application.Bids;
 using OpenLane.Api.Common.Exceptions;
 using OpenLane.Api.Infrastructure;
+using MassTransit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,18 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<ProblemDetailsExceptionHandler>();
+
+builder.Services.AddMassTransit(config =>
+{
+	config.SetKebabCaseEndpointNameFormatter();
+
+	config.AddConsumers(typeof(Program).Assembly);
+
+	config.UsingInMemory((ctx, cfg) =>
+	{
+		cfg.ConfigureEndpoints(ctx);
+	});
+});
 
 builder.Services.AddInfra(builder.Configuration);
 builder.Services.AddBids();
