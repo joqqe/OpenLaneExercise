@@ -6,7 +6,6 @@ using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Microsoft.AspNetCore.Identity;
 using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,6 +34,8 @@ builder.Logging.AddOpenTelemetry(logging => logging.AddOtlpExporter());
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddSignalR();
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<ProblemDetailsExceptionHandler>();

@@ -1,4 +1,5 @@
 ﻿using OpenLane.Api.Application.Bids.Get;
+using OpenLane.Api.Application.Bids.Hubs;
 using OpenLane.Api.Application.Bids.Post;
 using OpenLane.Api.Common;
 using OpenLane.Api.Common.Interfaces;
@@ -13,6 +14,7 @@ public static class ConfigureBidsExtensions
 		services.AddScoped<IHandler<GetBidRequest, Result<Bid?>>, GetBidHandler>();
 		services.AddScoped<IHandler<PostBidRequest, Result<Bid>>, PostBidHandler>();
 
+
 		return services;
 	}
 
@@ -20,6 +22,8 @@ public static class ConfigureBidsExtensions
 	{
 		app.UseGetBidEndpoint();
 		app.UsePostBidEndpoint();
+
+		app.MapHub<BidHub>("/signalr/bidHub");
 
 		return app;
 	}
