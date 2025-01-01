@@ -9,7 +9,7 @@ namespace OpenLane.Api.Application.Bids.Get;
 
 public static class GetBidEndpoint
 {
-	public const string Instance = "/Api/Bid/{0}";
+	public const string Instance = "/Api/Bid/{ObjectId}";
 
 	public static WebApplication UseGetBidEndpoint(this WebApplication app)
 	{
