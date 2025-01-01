@@ -17,7 +17,8 @@ public class BidEntityConfiguration : IEntityTypeConfiguration<Bid>
 			.IsRequired();
 
 		builder.Property(x => x.Price)
-			.IsRequired();
+			.IsRequired()
+			.HasColumnType("decimal(18, 6))");
 
 		builder.Property(x => x.User)
 			.IsRequired();

@@ -4,6 +4,7 @@ using OpenLane.Api.Common.Factories;
 using OpenLane.Api.Application.Dtos;
 using OpenLane.Api.Common;
 using OpenLane.Api.Domain;
+using Microsoft.AspNetCore.Mvc;
 
 namespace OpenLane.Api.Application.Bids.Get;
 
@@ -14,9 +15,9 @@ public static class GetBidEndpoint
 	public static WebApplication UseGetBidEndpoint(this WebApplication app)
 	{
 		app.MapGet(Instance, async (
-			ILogger<Program> logger,
-			IValidator<GetBidRequest> validator,
-			IHandler<GetBidRequest, Result<Bid?>> handler,
+			[FromServices] ILogger<Program> logger,
+			[FromServices] IValidator<GetBidRequest> validator,
+			[FromServices] IHandler<GetBidRequest, Result<Bid?>> handler,
 			Guid objectId) =>
 		{
 			ArgumentNullException.ThrowIfNull(validator);

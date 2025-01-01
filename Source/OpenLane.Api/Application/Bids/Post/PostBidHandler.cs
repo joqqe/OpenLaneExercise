@@ -4,8 +4,7 @@ using OpenLane.Api.Application.Bids.Consumers;
 using OpenLane.Api.Common;
 using OpenLane.Api.Common.Interfaces;
 using OpenLane.Api.Domain;
-using static Grpc.Core.Metadata;
-using AppContext = OpenLane.Api.Infrastructure.AppContext;
+using OpenLane.Api.Infrastructure;
 
 namespace OpenLane.Api.Application.Bids.Post;
 
@@ -14,10 +13,10 @@ public record PostBidRequest(Guid OfferObjectId, decimal Price, Guid User);
 public class PostBidHandler : IHandler<PostBidRequest, Result<Bid>>
 {
 	private readonly ILogger<PostBidHandler> _logger;
-	private readonly AppContext _appContext;
+	private readonly AppDbContext _appContext;
 	private readonly IBus _bus;
 
-	public PostBidHandler(ILogger<PostBidHandler> logger, AppContext appContext, IBus bus)
+	public PostBidHandler(ILogger<PostBidHandler> logger, AppDbContext appContext, IBus bus)
 	{
 		ArgumentNullException.ThrowIfNull(logger);
 		ArgumentNullException.ThrowIfNull(appContext);
@@ -36,6 +35,21 @@ public class PostBidHandler : IHandler<PostBidRequest, Result<Bid>>
 		if (offer is null)
 		{
 			var errorMessage = "No offer has been found.";
+			_logger.LogWarning(errorMessage);
+			return Result<Bid>.Failure(errorMessage);
+		}
+
+		var now = DateTimeOffset.Now;
+		if (offer.OpensAt < now && offer.ClosesAt > now)
+		{
+			var errorMessage = "The offer is not open to receive bids.";
+			_logger.LogWarning(errorMessage);
+			return Result<Bid>.Failure(errorMessage);
+		}
+
+		if (offer.StartingPrice > request.Price)
+		{
+			var errorMessage = "The bid price should be higher than the starting price.";
 			_logger.LogWarning(errorMessage);
 			return Result<Bid>.Failure(errorMessage);
 		}

@@ -6,7 +6,7 @@ public static class ConfigureInfraExtentions
 {
 	public static IServiceCollection AddInfra(this IServiceCollection services, ConfigurationManager configuration)
 	{
-		services.AddDbContext<AppContext>(options =>
+		services.AddDbContext<AppDbContext>(options =>
 		{
 			options.UseSqlServer(configuration.GetConnectionString("SQLServer"));
 		});

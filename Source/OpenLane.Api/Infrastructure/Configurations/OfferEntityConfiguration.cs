@@ -16,5 +16,15 @@ public class OfferEntityConfiguration : IEntityTypeConfiguration<Offer>
 		builder.HasOne(x => x.Product)
 			.WithMany(x => x.Offers)
 			.HasForeignKey(x => x.ProductId);
+
+		builder.Property(x => x.StartingPrice)
+			.IsRequired()
+			.HasColumnType("decimal(18, 6))");
+
+		builder.Property(x => x.OpensAt)
+			.IsRequired();
+
+		builder.Property(x => x.ClosesAt)
+			.IsRequired();
 	}
 }

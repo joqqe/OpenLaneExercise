@@ -2,7 +2,7 @@
 using OpenLane.Api.Common;
 using OpenLane.Api.Common.Interfaces;
 using OpenLane.Api.Domain;
-using AppContext = OpenLane.Api.Infrastructure.AppContext;
+using OpenLane.Api.Infrastructure;
 
 namespace OpenLane.Api.Application.Bids.Get;
 
@@ -11,9 +11,9 @@ public record GetBidRequest(Guid ObjectId);
 public class GetBidHandler : IHandler<GetBidRequest, Result<Bid?>>
 {
 	private readonly ILogger<GetBidHandler> _logger;
-	private readonly AppContext _appContext;
+	private readonly AppDbContext _appContext;
 
-	public GetBidHandler(ILogger<GetBidHandler> logger,AppContext appContext)
+	public GetBidHandler(ILogger<GetBidHandler> logger,AppDbContext appContext)
 	{
 		ArgumentNullException.ThrowIfNull(logger);
 		ArgumentNullException.ThrowIfNull(appContext);

@@ -4,6 +4,7 @@ using OpenLane.Api.Common.Interfaces;
 using OpenLane.Api.Common;
 using OpenLane.Api.Domain;
 using OpenLane.Api.Common.Factories;
+using Microsoft.AspNetCore.Mvc;
 
 namespace OpenLane.Api.Application.Bids.Post
 {
@@ -14,9 +15,9 @@ namespace OpenLane.Api.Application.Bids.Post
 		public static WebApplication UsePostBidEndpoint(this WebApplication app)
 		{
 			app.MapPost(Instance, async (
-				ILogger<Program> logger,
-				IValidator<PostBidRequest> validator,
-				IHandler<PostBidRequest, Result<Bid>> handler,
+				[FromServices] ILogger<Program> logger,
+				[FromServices] IValidator<PostBidRequest> validator,
+				[FromServices] IHandler<PostBidRequest, Result<Bid>> handler,
 				PostBidRequest request) =>
 			{
 				ArgumentNullException.ThrowIfNull(validator);
