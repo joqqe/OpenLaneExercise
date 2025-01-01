@@ -1,11 +1,10 @@
 ﻿using MassTransit;
 using Microsoft.AspNetCore.SignalR;
 using OpenLane.Api.Application.Bids.Hubs;
+using OpenLane.Api.Domain.Messages;
 using System.Text.Json;
 
 namespace OpenLane.Api.Application.Bids.Consumers;
-
-public record BidCreatedMessage();
 
 public class BidCreatedConsumer : IConsumer<BidCreatedMessage>
 {
