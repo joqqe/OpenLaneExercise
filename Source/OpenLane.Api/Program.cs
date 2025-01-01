@@ -2,8 +2,34 @@ using OpenLane.Api.Application.Bids;
 using OpenLane.Api.Common.Exceptions;
 using OpenLane.Api.Infrastructure;
 using MassTransit;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddOpenTelemetry()
+	.ConfigureResource(resource => resource.AddService("OpenLane.Api"))
+	.WithTracing(tracing =>
+	{
+		tracing
+			.AddAspNetCoreInstrumentation()
+			.AddHttpClientInstrumentation()
+			.AddEntityFrameworkCoreInstrumentation()
+			.AddMassTransitInstrumentation();
+
+		tracing.AddOtlpExporter();
+	})
+	.WithMetrics(metrics =>
+	{
+		metrics
+			.AddAspNetCoreInstrumentation()
+			.AddHttpClientInstrumentation();
+
+		metrics.AddOtlpExporter();
+	});
+builder.Logging.AddOpenTelemetry(logging => logging.AddOtlpExporter());
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
