@@ -5,6 +5,14 @@ namespace OpenLane.Api.Common.Exceptions
 {
 	public class ProblemDetailsExceptionHandler : IExceptionHandler
 	{
+		private readonly ILogger<ProblemDetailsExceptionHandler> _logger;
+
+		public ProblemDetailsExceptionHandler(ILogger<ProblemDetailsExceptionHandler> logger)
+		{
+			ArgumentNullException.ThrowIfNull(logger);
+			_logger = logger;
+		}
+
 		public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
 		{
 			int status = exception switch
@@ -23,6 +31,8 @@ namespace OpenLane.Api.Common.Exceptions
 			};
 
 			await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
+
+			_logger.LogError("Global exception occured: {ProblemDetails}", problemDetails);
 
 			return true;
 		}

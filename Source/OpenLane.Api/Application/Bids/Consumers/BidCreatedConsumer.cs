@@ -20,7 +20,7 @@ public class BidCreatedConsumer : IConsumer<BidCreatedMessage>
 	{
 		_logger.LogInformation("{Consumer}: {Message}", nameof(BidCreatedConsumer), JsonSerializer.Serialize(context.Message));
 
-		// Do some magic bids stuff here.
+		// Do some magic bid stuff here.
 
 		return Task.CompletedTask;
 	}
