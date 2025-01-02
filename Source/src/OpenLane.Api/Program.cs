@@ -48,8 +48,18 @@ builder.Services.AddMassTransit(config =>
 
 	config.AddConsumers(typeof(Program).Assembly);
 
-	config.UsingInMemory((ctx, cfg) =>
+	config.UsingRabbitMq((ctx, cfg) =>
 	{
+		var host = builder.Configuration.GetValue<string>("MessageQueue:Host");
+		var username = builder.Configuration.GetValue<string>("MessageQueue:Username");
+		var password = builder.Configuration.GetValue<string>("MessageQueue:Password");
+
+		cfg.Host(host, "/", h =>
+		{
+			h.Username(username!);
+			h.Password(password!);
+		});
+
 		cfg.ConfigureEndpoints(ctx);
 	});
 });
