@@ -1,3 +1,5 @@
-﻿namespace OpenLane.Api.Domain.Messages;
+﻿using OpenLane.Api.Application.Dtos;
 
-public record BidCreatedMessage(Bid Bid);
+namespace OpenLane.Api.Domain.Messages;
+
+public record BidCreatedMessage(BidDto Bid);

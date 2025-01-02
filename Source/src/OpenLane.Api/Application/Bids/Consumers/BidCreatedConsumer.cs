@@ -23,7 +23,7 @@ public class BidCreatedConsumer : IConsumer<BidCreatedMessage>
 	{
 		_logger.LogInformation("{Consumer}: {Message}", nameof(BidCreatedConsumer), JsonSerializer.Serialize(context.Message));
 
-		_hubContext.Clients.All.SendAsync("Bid", context.Message);
+		_hubContext.Clients.All.SendAsync("Bid", context.Message.Bid);
 
 		// Do some magic bid stuff here.
 
