@@ -20,8 +20,6 @@ public class BidEndpointTests : IClassFixture<ApiWebApplicationFactory>
 		var requestUri = string.Format(GetBidEndpoint.InstanceFormat, ApiWebApplicationFactory.BidObjectId);
 		var response = await _client.GetAsync(requestUri);
 
-		var message = await response.Content.ReadAsStringAsync();
-
 		response.StatusCode.Should().Be(HttpStatusCode.OK);
 	}
 
@@ -32,8 +30,6 @@ public class BidEndpointTests : IClassFixture<ApiWebApplicationFactory>
 		var requestUri = string.Format(GetBidEndpoint.InstanceFormat, Guid.NewGuid());
 		var response = await _client.GetAsync(requestUri);
 
-		var message = await response.Content.ReadAsStringAsync();
-
 		response.StatusCode.Should().Be(HttpStatusCode.NotFound);
 	}
 
@@ -42,8 +38,6 @@ public class BidEndpointTests : IClassFixture<ApiWebApplicationFactory>
 	{
 		var requestUri = string.Format(GetBidEndpoint.InstanceFormat, Guid.Empty);
 		var response = await _client.GetAsync(requestUri);
-
-		var message = await response.Content.ReadAsStringAsync();
 
 		response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 	}

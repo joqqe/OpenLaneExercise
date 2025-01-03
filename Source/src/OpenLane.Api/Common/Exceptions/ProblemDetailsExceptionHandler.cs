@@ -1,40 +1,39 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace OpenLane.Api.Common.Exceptions
+namespace OpenLane.Api.Common.Exceptions;
+
+public class ProblemDetailsExceptionHandler : IExceptionHandler
 {
-	public class ProblemDetailsExceptionHandler : IExceptionHandler
+	private readonly ILogger<ProblemDetailsExceptionHandler> _logger;
+
+	public ProblemDetailsExceptionHandler(ILogger<ProblemDetailsExceptionHandler> logger)
 	{
-		private readonly ILogger<ProblemDetailsExceptionHandler> _logger;
+		ArgumentNullException.ThrowIfNull(logger);
+		_logger = logger;
+	}
 
-		public ProblemDetailsExceptionHandler(ILogger<ProblemDetailsExceptionHandler> logger)
+	public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
+	{
+		int status = exception switch
 		{
-			ArgumentNullException.ThrowIfNull(logger);
-			_logger = logger;
-		}
+			ArgumentException => StatusCodes.Status400BadRequest,
+			_ => StatusCodes.Status500InternalServerError
+		};
+		httpContext.Response.StatusCode = status;
 
-		public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
+		var problemDetails = new ProblemDetails
 		{
-			int status = exception switch
-			{
-				ArgumentException => StatusCodes.Status400BadRequest,
-				_ => StatusCodes.Status500InternalServerError
-			};
-			httpContext.Response.StatusCode = status;
+			Status = status,
+			Title = "An error occurred",
+			Type = exception.GetType().Name,
+			Detail = exception.Message
+		};
 
-			var problemDetails = new ProblemDetails
-			{
-				Status = status,
-				Title = "An error occurred",
-				Type = exception.GetType().Name,
-				Detail = exception.Message
-			};
+		await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
 
-			await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
+		_logger.LogError("Global exception occured: {ProblemDetails}", problemDetails);
 
-			_logger.LogError("Global exception occured: {ProblemDetails}", problemDetails);
-
-			return true;
-		}
+		return true;
 	}
 }

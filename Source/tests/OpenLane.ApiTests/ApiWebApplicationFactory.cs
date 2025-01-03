@@ -7,24 +7,34 @@ using Microsoft.Extensions.Logging;
 using OpenLane.Api.Domain;
 using OpenLane.Api.Infrastructure;
 using Testcontainers.MsSql;
+using Testcontainers.RabbitMq;
 
 namespace OpenLane.ApiTests;
 
 public class ApiWebApplicationFactory : WebApplicationFactory<Program>
 {
 	public static readonly Guid BidObjectId = Guid.NewGuid();
+	public static readonly Guid OfferObjectId = Guid.NewGuid();
 	private readonly MsSqlContainer _msSqlContainer;
+	private readonly RabbitMqContainer _rabbitMqContainer;
 
 	public ApiWebApplicationFactory()
 	{
 		_msSqlContainer = new MsSqlBuilder().Build();
 		_msSqlContainer.StartAsync().GetAwaiter().GetResult();
+
+		_rabbitMqContainer = new RabbitMqBuilder().WithUsername("guest").WithPassword("guest").Build();
+		_rabbitMqContainer.StartAsync().GetAwaiter().GetResult();
 	}
 
 	public override async ValueTask DisposeAsync()
 	{
 		await _msSqlContainer.StopAsync();
 		await _msSqlContainer.DisposeAsync();
+
+		await _rabbitMqContainer.StopAsync();
+		await _rabbitMqContainer.DisposeAsync();
+
 		await base.DisposeAsync();
 	}
 
@@ -32,10 +42,15 @@ public class ApiWebApplicationFactory : WebApplicationFactory<Program>
 	{
 		builder.ConfigureAppConfiguration(config =>
 		{
+			_rabbitMqContainer.GetConnectionString();
+
 			var configuration = new ConfigurationBuilder()
 				.AddInMemoryCollection(new Dictionary<string, string?>
 				{
-					{ "ConnectionStrings:AppDB", _msSqlContainer.GetConnectionString() }
+					{ "ConnectionStrings:AppDB", _msSqlContainer.GetConnectionString() },
+					{ "MessageQueue:Host", _rabbitMqContainer.Hostname },
+					{ "MessageQueue:Username", "guest" },
+					{ "MessageQueue:Password", "guest" }
 				})
 				.Build();
 
@@ -65,7 +80,7 @@ public class ApiWebApplicationFactory : WebApplicationFactory<Program>
 		};
 		var newOffer = new Offer
 		{
-			ObjectId = Guid.NewGuid(),
+			ObjectId = OfferObjectId,
 			Product = newProduct,
 			StartingPrice = 100m,
 			OpensAt = DateTimeOffset.Now,

@@ -41,7 +41,7 @@ public class PostBidHandler : IHandler<PostBidRequest, Result<Bid>>
 		}
 
 		var now = DateTimeOffset.Now;
-		if (offer.OpensAt < now && offer.ClosesAt > now)
+		if (offer.OpensAt > now && offer.ClosesAt < now)
 		{
 			var errorMessage = "The offer is not open to receive bids.";
 			_logger.LogWarning(errorMessage);
@@ -55,8 +55,8 @@ public class PostBidHandler : IHandler<PostBidRequest, Result<Bid>>
 			return Result<Bid>.Failure(errorMessage);
 		}
 
-		var isBidHigherThenPrevious = await _appContext.Bids.AnyAsync(x => x.UserObjectId == request.UserObjectId && x.Price < request.Price);
-		if (!isBidHigherThenPrevious)
+		var isBidLowerOrEqualThenPrevious = await _appContext.Bids.AnyAsync(x => x.UserObjectId == request.UserObjectId && x.Price >= request.Price);
+		if (isBidLowerOrEqualThenPrevious)
 		{
 			var errorMessage = "There is already a higher bid.";
 			_logger.LogWarning(errorMessage);
