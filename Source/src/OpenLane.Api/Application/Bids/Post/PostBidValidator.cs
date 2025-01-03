@@ -15,7 +15,7 @@ namespace OpenLane.Api.Application.Bids.Post
 				.NotEmpty().WithMessage("Price can't be empty.")
 				.GreaterThan(0);
 
-			RuleFor(x => x.User)
+			RuleFor(x => x.UserObjectId)
 				.NotNull().WithMessage("User is required.")
 				.NotEmpty().WithMessage("User can't be empty.");
 		}

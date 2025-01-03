@@ -9,7 +9,7 @@ using OpenLane.Api.Infrastructure;
 
 namespace OpenLane.Api.Application.Bids.Post;
 
-public record PostBidRequest(Guid OfferObjectId, decimal Price, Guid User);
+public record PostBidRequest(Guid OfferObjectId, decimal Price, Guid UserObjectId);
 
 public class PostBidHandler : IHandler<PostBidRequest, Result<Bid>>
 {
@@ -55,7 +55,7 @@ public class PostBidHandler : IHandler<PostBidRequest, Result<Bid>>
 			return Result<Bid>.Failure(errorMessage);
 		}
 
-		var isBidHigherThenPrevious = await _appContext.Bids.AnyAsync(x => x.User == request.User && x.Price < request.Price);
+		var isBidHigherThenPrevious = await _appContext.Bids.AnyAsync(x => x.UserObjectId == request.UserObjectId && x.Price < request.Price);
 		if (!isBidHigherThenPrevious)
 		{
 			var errorMessage = "There is already a higher bid.";
@@ -69,7 +69,7 @@ public class PostBidHandler : IHandler<PostBidRequest, Result<Bid>>
 			Offer = offer,
 			OfferId = offer.Id,
 			Price = request.Price,
-			User = request.User,
+			UserObjectId = request.UserObjectId,
 			ReceivedAt = DateTimeOffset.Now
 		};
 

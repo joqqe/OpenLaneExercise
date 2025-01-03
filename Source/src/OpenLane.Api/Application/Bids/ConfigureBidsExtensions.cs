@@ -14,7 +14,6 @@ public static class ConfigureBidsExtensions
 		services.AddScoped<IHandler<GetBidRequest, Result<Bid?>>, GetBidHandler>();
 		services.AddScoped<IHandler<PostBidRequest, Result<Bid>>, PostBidHandler>();
 
-
 		return services;
 	}
 

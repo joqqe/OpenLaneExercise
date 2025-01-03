@@ -84,3 +84,6 @@ app.UseHttpsRedirection();
 app.UseBids();
 
 app.Run();
+
+// For testing purposes
+public partial class Program { }

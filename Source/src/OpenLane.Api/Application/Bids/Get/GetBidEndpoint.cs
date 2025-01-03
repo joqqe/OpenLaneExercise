@@ -10,7 +10,8 @@ namespace OpenLane.Api.Application.Bids.Get;
 
 public static class GetBidEndpoint
 {
-	public const string Instance = "/Api/Bid/{ObjectId}";
+	public const string InstanceFormat = "/Api/Bid/{0}";
+	public static readonly string Instance = string.Format(InstanceFormat, "{objectId}");
 
 	public static WebApplication UseGetBidEndpoint(this WebApplication app)
 	{
@@ -39,7 +40,7 @@ public static class GetBidEndpoint
 			if (response.Value is null)
 				return Results.NotFound();
 
-			var dto = new BidDto(response.Value.ObjectId, response.Value.Price, response.Value.User);
+			var dto = new BidDto(response.Value.ObjectId, response.Value.Price, response.Value.UserObjectId);
 			logger.LogInformation("Successfuly send bid dto.");
 			return Results.Ok(dto);
 		})

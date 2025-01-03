@@ -10,7 +10,8 @@ namespace OpenLane.Api.Application.Bids.Post
 {
 	public static class PostBidEndpoint
 	{
-		public const string Instance = "/Api/Bid";
+		public const string InstanceFormat = "/Api/Bid";
+		public const string Instance = InstanceFormat;
 
 		public static WebApplication UsePostBidEndpoint(this WebApplication app)
 		{
