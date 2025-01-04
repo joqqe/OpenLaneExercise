@@ -23,7 +23,7 @@ public class ApiWebApplicationFactory : WebApplicationFactory<Program>
 		_msSqlContainer = new MsSqlBuilder().Build();
 		_msSqlContainer.StartAsync().GetAwaiter().GetResult();
 
-		_rabbitMqContainer = new RabbitMqBuilder().WithUsername("guest").WithPassword("guest").Build();
+		_rabbitMqContainer = new RabbitMqBuilder().Build();
 		_rabbitMqContainer.StartAsync().GetAwaiter().GetResult();
 	}
 
@@ -42,15 +42,11 @@ public class ApiWebApplicationFactory : WebApplicationFactory<Program>
 	{
 		builder.ConfigureAppConfiguration(config =>
 		{
-			_rabbitMqContainer.GetConnectionString();
-
 			var configuration = new ConfigurationBuilder()
 				.AddInMemoryCollection(new Dictionary<string, string?>
 				{
 					{ "ConnectionStrings:AppDB", _msSqlContainer.GetConnectionString() },
-					{ "MessageQueue:Host", _rabbitMqContainer.Hostname },
-					{ "MessageQueue:Username", "guest" },
-					{ "MessageQueue:Password", "guest" }
+					{ "ConnectionStrings:MessageQueue", _rabbitMqContainer.GetConnectionString() }
 				})
 				.Build();
 

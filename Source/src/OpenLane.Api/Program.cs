@@ -7,6 +7,7 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using FluentValidation;
+using OpenLane.Api.Application.Bids.Consumers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,17 +51,9 @@ builder.Services.AddMassTransit(config =>
 
 	config.UsingRabbitMq((ctx, cfg) =>
 	{
-		var host = builder.Configuration.GetValue<string>("MessageQueue:Host");
-		var username = builder.Configuration.GetValue<string>("MessageQueue:Username");
-		var password = builder.Configuration.GetValue<string>("MessageQueue:Password");
-
-		cfg.Host(host, "/", h =>
-		{
-			h.Username(username!);
-			h.Password(password!);
-		});
-
+		cfg.Host(builder.Configuration.GetConnectionString("MessageQueue"));
 		cfg.ConfigureEndpoints(ctx);
+		cfg.Durable = true;
 	});
 });
 

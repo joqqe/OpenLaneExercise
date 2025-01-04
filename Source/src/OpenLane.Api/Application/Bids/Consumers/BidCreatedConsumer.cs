@@ -13,8 +13,9 @@ public class BidCreatedConsumer : IConsumer<BidCreatedMessage>
 
 	public BidCreatedConsumer(ILogger<BidCreatedConsumer> logger, IHubContext<BidHub> hubContext)
 	{
-		ArgumentNullException.ThrowIfNull(_logger);
-		
+		ArgumentNullException.ThrowIfNull(logger);
+		ArgumentNullException.ThrowIfNull(hubContext);
+
 		_logger = logger;
 		_hubContext = hubContext;
 	}

@@ -60,7 +60,8 @@ docker run --rm -it -p 18888:18888 -p 4317:18889 -d --name aspire-dashboard -e D
     ```
 
 ## Todos
+- Adding cancellationTokens
 - Split up Api into Api and Service to consumer messages (better for scaling)
 - Adding security
 - Add missing endpoints
-- 
+- Outbox pattern 

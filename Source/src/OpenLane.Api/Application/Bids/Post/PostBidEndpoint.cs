@@ -37,7 +37,7 @@ public static class PostBidEndpoint
 
 			logger.LogInformation("Successfuly send created response.");
 
-			return Results.Created(string.Format(GetBidEndpoint.Instance, response.Value!.ObjectId), request);
+			return Results.Created(string.Format(GetBidEndpoint.InstanceFormat, response.Value!.ObjectId), request);
 		})
 		.WithName("PostBid")
 		.Produces(StatusCodes.Status200OK)

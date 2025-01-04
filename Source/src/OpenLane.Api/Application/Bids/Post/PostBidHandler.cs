@@ -79,7 +79,7 @@ public class PostBidHandler : IHandler<PostBidRequest, Result<Bid>>
 		_logger.LogInformation("Successfuly created bid entity: {Entity}", newBid);
 
 		var newBidDto = new BidDto(newBid.ObjectId, newBid.Price, newBid.Offer.ObjectId);
-		await _bus.Send(new BidCreatedMessage(newBidDto));
+		await _bus.Publish(new BidCreatedMessage(newBidDto));
 
 		_logger.LogInformation("Successfuly send bid created message.");
 

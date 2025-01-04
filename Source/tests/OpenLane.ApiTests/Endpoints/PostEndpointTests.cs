@@ -16,7 +16,7 @@ public class PostEndpointTests : IClassFixture<ApiWebApplicationFactory>
 	}
 
 	[Fact]
-	public async Task PostBids_ShouldReturn_200OK()
+	public async Task PostBids_ShouldReturn_201Created()
 	{
 		var requestUri = string.Format(PostBidEndpoint.InstanceFormat);
 
@@ -27,6 +27,6 @@ public class PostEndpointTests : IClassFixture<ApiWebApplicationFactory>
 		// To be removed!
 		var message = await response.Content.ReadAsStringAsync();
 
-		response.StatusCode.Should().Be(HttpStatusCode.OK);
+		response.StatusCode.Should().Be(HttpStatusCode.Created);
 	}
 }
