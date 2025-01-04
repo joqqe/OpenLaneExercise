@@ -39,8 +39,8 @@ docker run -it --rm --name aspire-dashboard -p 18888:18888 -p 4317:18889 -e DOTN
 
     -- Revert migration
     dotnet ef database update <20240208081423_InitialCreate> --context AppDbContext -p ./src/OpenLane.Api/OpenLane.Api.csproj -s ./src/OpenLane.Api/OpenLane.Api.csproj
-
     -- Remove migration
+
     dotnet ef migrations remove --context AppDbContext -p ./src/OpenLane.Api/OpenLane.Api.csproj -s ./src/OpenLane.Api/OpenLane.Api.csproj
     ```
 
@@ -59,9 +59,12 @@ docker run -it --rm --name aspire-dashboard -p 18888:18888 -p 4317:18889 -e DOTN
     dotnet run
     ```
 
+## Load Testing
+k6 run .\load_test.js --insecure-skip-tls-verify
+
 ## Todos
-- Adding cancellationTokens
-- Split up Api into Api and Service to consumer messages (better for scaling)
-- Adding security
+- Adding CancellationTokens
 - Add missing endpoints
+- Split up Api into Api and Service to consumer messages (better for scaling)
 - Outbox pattern 
+- Adding security

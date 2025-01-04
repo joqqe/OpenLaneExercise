@@ -7,8 +7,6 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using FluentValidation;
-using OpenLane.Api.Application.Bids.Consumers;
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenTelemetry()
@@ -53,6 +51,7 @@ builder.Services.AddMassTransit(config =>
 	{
 		cfg.Host(builder.Configuration.GetConnectionString("MessageQueue"));
 		cfg.ConfigureEndpoints(ctx);
+		cfg.UseRateLimit(250, TimeSpan.FromSeconds(5));
 		cfg.Durable = true;
 	});
 });
