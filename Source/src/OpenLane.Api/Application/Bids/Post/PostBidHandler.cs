@@ -35,13 +35,13 @@ public class PostBidHandler : IHandler<PostBidRequest, Result<Bid>>
 		var offer = await _appContext.Offers.SingleOrDefaultAsync(x => x.ObjectId == request.OfferObjectId);
 		if (offer is null)
 		{
-			var errorMessage = "No offer has been found.";
+			var errorMessage = "No offer was been found.";
 			_logger.LogWarning(errorMessage);
 			return Result<Bid>.Failure(errorMessage);
 		}
 
 		var now = DateTimeOffset.Now;
-		if (offer.OpensAt > now && offer.ClosesAt < now)
+		if (offer.OpensAt > now || offer.ClosesAt < now)
 		{
 			var errorMessage = "The offer is not open to receive bids.";
 			_logger.LogWarning(errorMessage);

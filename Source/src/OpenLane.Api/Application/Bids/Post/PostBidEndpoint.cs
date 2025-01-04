@@ -40,7 +40,7 @@ public static class PostBidEndpoint
 			return Results.Created(string.Format(GetBidEndpoint.InstanceFormat, response.Value!.ObjectId), request);
 		})
 		.WithName("PostBid")
-		.Produces(StatusCodes.Status200OK)
+		.Produces(StatusCodes.Status201Created)
 		.Produces(StatusCodes.Status400BadRequest)
 		.ProducesValidationProblem()
 		.WithOpenApi();

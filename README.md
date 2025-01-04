@@ -7,10 +7,10 @@ docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=yourStrong(!)Password" -p 14
 connectionstring: "Server=127.0.0.1,1433;Password=yourStrong(!)Password;User Id=SA;Initial Catalog=OpenLane-Dev;"
 
 ### Message Queue (RabbitMq)
-docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:4.0-management
+docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 -d rabbitmq:4.0-management
 
 ### Logging (Aspire Dashboard)
-docker run --rm -it -p 18888:18888 -p 4317:18889 -d --name aspire-dashboard -e DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS="true" mcr.microsoft.com/dotnet/aspire-dashboard:8.1.0
+docker run -it --rm --name aspire-dashboard -p 18888:18888 -p 4317:18889 -e DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS="true" -d mcr.microsoft.com/dotnet/aspire-dashboard:8.1.0
 
 ## Running Project Locally
 ### Database

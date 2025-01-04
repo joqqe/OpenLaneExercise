@@ -24,9 +24,29 @@ public class PostEndpointTests : IClassFixture<ApiWebApplicationFactory>
 		var bodyString = new StringContent(JsonSerializer.Serialize(bodyObject), Encoding.UTF8, "application/json");
 		var response = await _client.PostAsync(requestUri, bodyString);
 
-		// To be removed!
-		var message = await response.Content.ReadAsStringAsync();
-
 		response.StatusCode.Should().Be(HttpStatusCode.Created);
+	}
+
+	[Theory]
+	[MemberData(nameof(GetBadRequestData))]
+	public async Task PostBids_ShouldReturn_400BadRequest(PostBidRequest bodyObject)
+	{
+		var requestUri = string.Format(PostBidEndpoint.InstanceFormat);
+
+		var bodyString = new StringContent(JsonSerializer.Serialize(bodyObject), Encoding.UTF8, "application/json");
+		var response = await _client.PostAsync(requestUri, bodyString);
+
+		response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+	}
+	public static IEnumerable<object[]> GetBadRequestData()
+	{
+		yield return new object[] { new PostBidRequest(Guid.Empty, 120m, Guid.NewGuid()) };
+		yield return new object[] { new PostBidRequest(Guid.NewGuid(), 0, Guid.NewGuid()) };
+		yield return new object[] { new PostBidRequest(Guid.NewGuid(), 120m, Guid.Empty) };
+		yield return new object[] { new PostBidRequest(Guid.NewGuid(), 120m, Guid.NewGuid()) };
+		yield return new object[] { new PostBidRequest(ApiWebApplicationFactory.OfferObjectId, 10m, Guid.NewGuid()) };
+		yield return new object[] { new PostBidRequest(ApiWebApplicationFactory.OfferObjectId, 110m, ApiWebApplicationFactory.UserObjectId) };
+		yield return new object[] { new PostBidRequest(ApiWebApplicationFactory.OfferObjectIdClosed, 120m, ApiWebApplicationFactory.UserObjectId) };
+		yield return new object[] { new PostBidRequest(ApiWebApplicationFactory.OfferObjectIdFuture, 120m, ApiWebApplicationFactory.UserObjectId) };
 	}
 }

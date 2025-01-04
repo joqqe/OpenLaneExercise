@@ -15,6 +15,9 @@ public class ApiWebApplicationFactory : WebApplicationFactory<Program>
 {
 	public static readonly Guid BidObjectId = Guid.NewGuid();
 	public static readonly Guid OfferObjectId = Guid.NewGuid();
+	public static readonly Guid OfferObjectIdClosed = Guid.NewGuid();
+	public static readonly Guid OfferObjectIdFuture = Guid.NewGuid();
+	public static readonly Guid UserObjectId = Guid.NewGuid();
 	private readonly MsSqlContainer _msSqlContainer;
 	private readonly RabbitMqContainer _rabbitMqContainer;
 
@@ -69,15 +72,16 @@ public class ApiWebApplicationFactory : WebApplicationFactory<Program>
 
 	private void SeedDatabase(AppDbContext appDbContext)
 	{
-		var newProduct = new Product
+		// Open offer
+		var productA = new Product
 		{
 			ObjectId = Guid.NewGuid(),
 			Name = "ProductA"
 		};
-		var newOffer = new Offer
+		var openOffer = new Offer
 		{
 			ObjectId = OfferObjectId,
-			Product = newProduct,
+			Product = productA,
 			StartingPrice = 100m,
 			OpensAt = DateTimeOffset.Now,
 			ClosesAt = DateTimeOffset.Now.AddMonths(1)
@@ -85,13 +89,45 @@ public class ApiWebApplicationFactory : WebApplicationFactory<Program>
 		var newBid = new Bid
 		{
 			ObjectId = BidObjectId,
-			Offer = newOffer,
+			Offer = openOffer,
 			Price = 110m,
 			ReceivedAt = DateTimeOffset.Now,
-			UserObjectId = Guid.NewGuid()
+			UserObjectId = UserObjectId
 		};
-
 		appDbContext.Bids.Add(newBid);
+
+		// Closed offer
+		var productB = new Product
+		{
+			ObjectId = Guid.NewGuid(),
+			Name = "ProductB"
+		};
+		var closedOffer = new Offer
+		{
+			ObjectId = OfferObjectIdClosed,
+			Product = productB,
+			StartingPrice = 100m,
+			OpensAt = DateTimeOffset.Now.AddMonths(-2),
+			ClosesAt = DateTimeOffset.Now.AddMonths(-1)
+		};
+		appDbContext.Offers.Add(closedOffer);
+
+		// Future offer
+		var productC = new Product
+		{
+			ObjectId = Guid.NewGuid(),
+			Name = "ProductC"
+		};
+		var futureOffer = new Offer
+		{
+			ObjectId = OfferObjectIdFuture,
+			Product = productC,
+			StartingPrice = 100m,
+			OpensAt = DateTimeOffset.Now.AddMonths(1),
+			ClosesAt = DateTimeOffset.Now.AddMonths(2)
+		};
+		appDbContext.Offers.Add(futureOffer);
+
 		appDbContext.SaveChanges();
 	}
 }
