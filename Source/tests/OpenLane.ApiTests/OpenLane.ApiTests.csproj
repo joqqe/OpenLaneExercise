@@ -28,6 +28,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\OpenLane.Api\OpenLane.Api.csproj" />
+    <ProjectReference Include="..\..\src\OpenLane.Domain\OpenLane.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>

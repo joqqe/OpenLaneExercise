@@ -21,6 +21,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\OpenLane.Domain\OpenLane.Domain.csproj" />
+	  <ProjectReference Include="..\OpenLane.Domain\OpenLane.Domain.csproj" />
 	</ItemGroup>
 
 </Project>
