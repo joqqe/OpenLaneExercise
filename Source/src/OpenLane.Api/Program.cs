@@ -7,7 +7,6 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using FluentValidation;
-using OpenLane.Domain;
 
 var builder = WebApplication.CreateBuilder(args);
 
