@@ -4,9 +4,9 @@ import exec from 'k6/execution';
 
 export let options = {
     stages: [
-        { duration: '30s', target: 20 }, // Ramp-up
-        { duration: '1m', target: 20 },  // Stay at
-        { duration: '10s', target: 0 },  // Ramp-down
+        { duration: '1m', target: 40 }, // Ramp-up
+        { duration: '2m', target: 40 },  // Stay at
+        { duration: '20s', target: 0 },  // Ramp-down
     ],
 };
 

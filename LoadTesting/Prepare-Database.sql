@@ -1,5 +1,5 @@
 Delete from [OpenLane-Dev].[dbo].[Bids]
-Where ObjectId = '57e3f9d5-a32c-4d9a-94cb-79a3fea2368a'
+Where OfferId = (SELECT Id FROM [OpenLane-Dev].[dbo].[Offers] WHERE ObjectId = '47e3f9d5-a32c-4d9a-94cb-79a3fea2368a')
 
 BEGIN
    IF NOT EXISTS (SELECT * FROM [OpenLane-Dev].[dbo].[Products] 
