@@ -4,7 +4,8 @@ See Docs folder.
 ## To Install
 ### Database (SQL Server)
 docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=yourStrong(!)Password" -p 1433:1433 -d mcr.microsoft.com/mssql/server:2022-latest
-connectionstring: "Server=127.0.0.1,1433;Password=yourStrong(!)Password;User Id=SA;Initial Catalog=OpenLane-Dev;"
+
+```connectionstring: "Server=127.0.0.1,1433;Password=yourStrong(!)Password;User Id=SA;Initial Catalog=OpenLane-Dev;"```
 
 ### Message Queue (RabbitMq)
 docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 -d rabbitmq:4.0-management
@@ -44,7 +45,7 @@ docker run -it --rm --name aspire-dashboard -p 18888:18888 -p 4317:18889 -e DOTN
     dotnet ef migrations remove --context AppDbContext -p ./src/OpenLane.Api/OpenLane.Api.csproj -s ./src/OpenLane.Api/OpenLane.Api.csproj
     ```
 
-### Api
+### Api & MessageProcessor
 1. Restore the solution.
     ```
     dotnet restore
@@ -60,13 +61,15 @@ docker run -it --rm --name aspire-dashboard -p 18888:18888 -p 4317:18889 -e DOTN
     ```
 
 ## Load Testing
-k6 run .\load_test.js --insecure-skip-tls-verify
+1. Run application locally
+2. Execute follow script: ```Prepare-Database.sql```
+3. Start test by: ```k6 run .\load_test.js --insecure-skip-tls-verify```
 
 ## Todos
-- IdempotencyKey (Add unique key to post -and put calls and messageConsumer)
+- IdempotencyKey (Add unique key to post -and put calls and messageConsumers)
 - Add unit test for message consumers
 - Fix duplicate testcontairs unit-tests
 - Add missing endpoints
-- Remove database seeding in Program file
+    - Update load-test when missing endpoints are implemented, so Prepare-Database.sql can be removed
 - Outbox pattern (saving bid and sending createdmessage are two different things)
 - Adding security
