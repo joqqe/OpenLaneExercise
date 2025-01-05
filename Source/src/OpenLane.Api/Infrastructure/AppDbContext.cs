@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using OpenLane.Api.Domain;
+using OpenLane.Domain;
 using OpenLane.Api.Infrastructure.Configurations;
 
 namespace OpenLane.Api.Infrastructure;

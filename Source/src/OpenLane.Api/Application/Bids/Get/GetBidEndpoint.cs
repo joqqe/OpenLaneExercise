@@ -3,8 +3,8 @@ using OpenLane.Api.Common.Interfaces;
 using OpenLane.Api.Common.Factories;
 using OpenLane.Api.Application.Dtos;
 using OpenLane.Api.Common;
-using OpenLane.Api.Domain;
 using Microsoft.AspNetCore.Mvc;
+using OpenLane.Domain;
 
 namespace OpenLane.Api.Application.Bids.Get;
 
@@ -23,7 +23,6 @@ public static class GetBidEndpoint
 		{
 			ArgumentNullException.ThrowIfNull(validator);
 			ArgumentNullException.ThrowIfNull(handler);
-
 			var request = new GetBidRequest(objectId);
 
 			var problemDetails = await validator.GetProblemDetailsAsync(request, Instance);

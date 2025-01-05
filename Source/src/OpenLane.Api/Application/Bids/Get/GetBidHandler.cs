@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OpenLane.Api.Common;
 using OpenLane.Api.Common.Interfaces;
-using OpenLane.Api.Domain;
+using OpenLane.Domain;
 using OpenLane.Api.Infrastructure;
 
 namespace OpenLane.Api.Application.Bids.Get;

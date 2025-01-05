@@ -32,4 +32,8 @@
     <Folder Include="Infrastructure\Migrations\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\OpenLane.Domain\OpenLane.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

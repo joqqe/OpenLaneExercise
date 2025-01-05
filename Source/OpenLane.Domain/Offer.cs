@@ -1,4 +1,4 @@
-﻿namespace OpenLane.Api.Domain;
+﻿namespace OpenLane.Domain;
 
 public class Offer
 {

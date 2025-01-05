@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using OpenLane.Api.Domain;
+using OpenLane.Domain;
 using OpenLane.Api.Infrastructure;
 using Testcontainers.MsSql;
 using Testcontainers.RabbitMq;
@@ -24,19 +24,16 @@ public class ApiWebApplicationFactory : WebApplicationFactory<Program>
 	public ApiWebApplicationFactory()
 	{
 		_msSqlContainer = new MsSqlBuilder().Build();
-		_msSqlContainer.StartAsync().GetAwaiter().GetResult();
-
 		_rabbitMqContainer = new RabbitMqBuilder().Build();
-		_rabbitMqContainer.StartAsync().GetAwaiter().GetResult();
+
+		Task.WhenAll([_msSqlContainer.StartAsync(), _rabbitMqContainer.StartAsync()])
+			.GetAwaiter().GetResult();
 	}
 
 	public override async ValueTask DisposeAsync()
 	{
-		await _msSqlContainer.StopAsync();
-		await _msSqlContainer.DisposeAsync();
-
-		await _rabbitMqContainer.StopAsync();
-		await _rabbitMqContainer.DisposeAsync();
+		await Task.WhenAll([_msSqlContainer.StopAsync(), _rabbitMqContainer.StopAsync()]);
+		await Task.WhenAll([_msSqlContainer.DisposeAsync().AsTask(), _rabbitMqContainer.DisposeAsync().AsTask()]);
 
 		await base.DisposeAsync();
 	}

@@ -1,12 +1,8 @@
-using OpenLane.Api.Application.Bids;
-using OpenLane.Api.Common.Exceptions;
-using OpenLane.Api.Infrastructure;
 using MassTransit;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,43 +31,29 @@ builder.Logging.AddOpenTelemetry(logging => logging.AddOtlpExporter());
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddProblemDetails();
-builder.Services.AddExceptionHandler<ProblemDetailsExceptionHandler>();
-
-builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
-
 builder.Services.AddMassTransit(config =>
 {
 	config.SetKebabCaseEndpointNameFormatter();
+
+	config.AddConsumers(typeof(Program).Assembly);
 
 	config.UsingRabbitMq((ctx, cfg) =>
 	{
 		cfg.Host(builder.Configuration.GetConnectionString("MessageQueue"));
 		cfg.ConfigureEndpoints(ctx);
+		cfg.UseRateLimit(250, TimeSpan.FromSeconds(5));
 		cfg.Durable = true;
 	});
 });
-
-builder.Services.AddInfra(builder.Configuration);
-builder.Services.AddBids();
-
-// ------------------------
 
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+	app.UseSwagger();
+	app.UseSwaggerUI();
 }
 
-app.UseExceptionHandler();
-app.UseStatusCodePages();
-
 app.UseHttpsRedirection();
-app.UseBids();
 
 app.Run();
-
-// For testing purposes
-public partial class Program { }

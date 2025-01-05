@@ -1,9 +1,8 @@
 ﻿using OpenLane.Api.Application.Bids.Get;
-using OpenLane.Api.Application.Bids.Hubs;
 using OpenLane.Api.Application.Bids.Post;
 using OpenLane.Api.Common;
 using OpenLane.Api.Common.Interfaces;
-using OpenLane.Api.Domain;
+using OpenLane.Domain;
 
 namespace OpenLane.Api.Application.Bids;
 
@@ -21,8 +20,6 @@ public static class ConfigureBidsExtensions
 	{
 		app.UseGetBidEndpoint();
 		app.UsePostBidEndpoint();
-
-		app.MapHub<BidHub>("/signalr/bidHub");
 
 		return app;
 	}

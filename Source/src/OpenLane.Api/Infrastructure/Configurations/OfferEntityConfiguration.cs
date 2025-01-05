@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using OpenLane.Api.Domain;
+using OpenLane.Domain;
 
 namespace OpenLane.Api.Infrastructure.Configurations;
 

@@ -2,9 +2,9 @@
 using OpenLane.Api.Application.Bids.Get;
 using OpenLane.Api.Common.Interfaces;
 using OpenLane.Api.Common;
-using OpenLane.Api.Domain;
 using OpenLane.Api.Common.Factories;
 using Microsoft.AspNetCore.Mvc;
+using OpenLane.Domain;
 
 namespace OpenLane.Api.Application.Bids.Post;
 

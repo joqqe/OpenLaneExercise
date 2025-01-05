@@ -1,11 +1,10 @@
 ﻿using MassTransit;
 using Microsoft.EntityFrameworkCore;
-using OpenLane.Api.Application.Dtos;
 using OpenLane.Api.Common;
 using OpenLane.Api.Common.Interfaces;
-using OpenLane.Api.Domain;
-using OpenLane.Api.Domain.Messages;
 using OpenLane.Api.Infrastructure;
+using OpenLane.Domain;
+using OpenLane.Domain.Messages;
 
 namespace OpenLane.Api.Application.Bids.Post;
 
@@ -78,8 +77,7 @@ public class PostBidHandler : IHandler<PostBidRequest, Result<Bid>>
 
 		_logger.LogInformation("Successfuly created bid entity: {Entity}", newBid);
 
-		var newBidDto = new BidDto(newBid.ObjectId, newBid.Price, newBid.Offer.ObjectId);
-		await _bus.Publish(new BidCreatedMessage(newBidDto));
+		await _bus.Publish(new BidCreatedMessage(newBid.ObjectId, newBid.Price, newBid.Offer.ObjectId));
 
 		_logger.LogInformation("Successfuly send bid created message.");
 
