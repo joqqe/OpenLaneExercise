@@ -31,6 +31,8 @@ builder.Logging.AddOpenTelemetry(logging => logging.AddOtlpExporter());
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddHealthChecks();
+
 builder.Services.AddMassTransit(config =>
 {
 	config.SetKebabCaseEndpointNameFormatter();
@@ -55,5 +57,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.MapHealthChecks("/api/health");
 
 app.Run();

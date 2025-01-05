@@ -40,6 +40,8 @@ builder.Services.AddExceptionHandler<ProblemDetailsExceptionHandler>();
 
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 
+builder.Services.AddHealthChecks();
+
 builder.Services.AddMassTransit(config =>
 {
 	config.SetKebabCaseEndpointNameFormatter();
@@ -67,6 +69,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
+
+app.MapHealthChecks("/api/health");
 
 app.UseHttpsRedirection();
 app.UseBids();
