@@ -7,6 +7,7 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using FluentValidation;
+using OpenLane.Domain;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,6 +57,47 @@ builder.Services.AddMassTransit(config =>
 
 builder.Services.AddInfra(builder.Configuration);
 builder.Services.AddBids();
+
+#region SeedDatabase
+// Todo: should be remove when missing endpoints are implementend like, post product and post offer!
+if (builder.Environment.IsDevelopment())
+{
+#pragma warning disable ASP0000 // Do not call 'IServiceCollection.BuildServiceProvider' in 'ConfigureServices'
+	using var sp = builder.Services.BuildServiceProvider();
+#pragma warning restore ASP0000 // Do not call 'IServiceCollection.BuildServiceProvider' in 'ConfigureServices'
+	using var scope = sp.CreateScope();
+	var scopedServices = scope.ServiceProvider;
+	var appDbContext = scopedServices.GetRequiredService<AppDbContext>();
+
+	appDbContext.Database.EnsureDeleted();
+	appDbContext.Database.EnsureCreated();
+
+	var offerObjectId = Guid.Parse("57e3f9d5-a32c-4d9a-94cb-79a3fea2368a");
+	var productA = new Product
+	{
+		ObjectId = Guid.NewGuid(),
+		Name = "ProductA"
+	};
+	var openOffer = new Offer
+	{
+		ObjectId = offerObjectId,
+		Product = productA,
+		StartingPrice = 100m,
+		OpensAt = DateTimeOffset.Now,
+		ClosesAt = DateTimeOffset.Now.AddMonths(1)
+	};
+	var newBid = new Bid
+	{
+		ObjectId = Guid.NewGuid(),
+		Offer = openOffer,
+		Price = 110m,
+		ReceivedAt = DateTimeOffset.Now,
+		UserObjectId = Guid.NewGuid()
+	};
+	appDbContext.Bids.Add(newBid);
+	appDbContext.SaveChanges();
+}
+#endregion
 
 // ------------------------
 
