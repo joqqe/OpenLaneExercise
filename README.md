@@ -1,5 +1,5 @@
 # OpenLaneExercise
-
+See Docs folder.
 
 ## To Install
 ### Database (SQL Server)
@@ -53,7 +53,7 @@ docker run -it --rm --name aspire-dashboard -p 18888:18888 -p 4317:18889 -e DOTN
     ```
     dotnet build
     ```
-3. Set startup-projects: Api.
+3. Set startup-projects: Api & MessageProcessor.
 4. Run the solution.
     ```
     dotnet run
@@ -63,8 +63,10 @@ docker run -it --rm --name aspire-dashboard -p 18888:18888 -p 4317:18889 -e DOTN
 k6 run .\load_test.js --insecure-skip-tls-verify
 
 ## Todos
-- IdempotencyId
-- Adding CancellationTokens
+- IdempotencyKey (Add unique key to post -and put calls and messageConsumer)
+- Add unit test for message consumers
+- Fix duplicate testcontairs unit-tests
 - Add missing endpoints
+- Remove database seeding in Program file
 - Outbox pattern (saving bid and sending createdmessage are two different things)
 - Adding security

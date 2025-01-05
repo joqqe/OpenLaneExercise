@@ -22,11 +22,11 @@ public class GetBidHandler : IHandler<GetBidRequest, Result<Bid?>>
 		_appContext = appContext;
 	}
 
-	public async Task<Result<Bid?>> InvokeAsync(GetBidRequest request)
+	public async Task<Result<Bid?>> InvokeAsync(GetBidRequest request, CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(request);
 
-		var entity = await _appContext.Bids.SingleOrDefaultAsync(x => x.ObjectId == request.ObjectId);
+		var entity = await _appContext.Bids.SingleOrDefaultAsync(x => x.ObjectId == request.ObjectId, cancellationToken);
 
 		if (entity is null)
 		{

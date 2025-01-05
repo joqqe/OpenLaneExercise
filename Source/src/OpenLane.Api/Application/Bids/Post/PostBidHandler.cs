@@ -27,11 +27,11 @@ public class PostBidHandler : IHandler<PostBidRequest, Result<Bid>>
 		_bus = bus;
 	}
 
-	public async Task<Result<Bid>> InvokeAsync(PostBidRequest request)
+	public async Task<Result<Bid>> InvokeAsync(PostBidRequest request, CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(request);
 
-		var offer = await _appContext.Offers.SingleOrDefaultAsync(x => x.ObjectId == request.OfferObjectId);
+		var offer = await _appContext.Offers.SingleOrDefaultAsync(x => x.ObjectId == request.OfferObjectId, cancellationToken);
 		if (offer is null)
 		{
 			var errorMessage = "No offer was been found.";
@@ -54,7 +54,7 @@ public class PostBidHandler : IHandler<PostBidRequest, Result<Bid>>
 			return Result<Bid>.Failure(errorMessage);
 		}
 
-		var isBidLowerOrEqualThenPrevious = await _appContext.Bids.AnyAsync(x => x.UserObjectId == request.UserObjectId && x.Price >= request.Price);
+		var isBidLowerOrEqualThenPrevious = await _appContext.Bids.AnyAsync(x => x.UserObjectId == request.UserObjectId && x.Price >= request.Price, cancellationToken);
 		if (isBidLowerOrEqualThenPrevious)
 		{
 			var errorMessage = "There is already a higher bid.";
@@ -72,12 +72,12 @@ public class PostBidHandler : IHandler<PostBidRequest, Result<Bid>>
 			ReceivedAt = DateTimeOffset.Now
 		};
 
-		await _appContext.Bids.AddAsync(newBid);
-		await _appContext.SaveChangesAsync();
+		await _appContext.Bids.AddAsync(newBid, cancellationToken);
+		await _appContext.SaveChangesAsync(cancellationToken);
 
 		_logger.LogInformation("Successfuly created bid entity: {Entity}", newBid);
 
-		await _bus.Publish(new BidCreatedMessage(newBid.ObjectId, newBid.Price, newBid.Offer.ObjectId));
+		await _bus.Publish(new BidCreatedMessage(newBid.ObjectId, newBid.Price, newBid.Offer.ObjectId), cancellationToken);
 
 		_logger.LogInformation("Successfuly send bid created message.");
 

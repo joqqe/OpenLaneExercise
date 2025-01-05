@@ -61,6 +61,7 @@ public class ApiWebApplicationFactory : WebApplicationFactory<Program>
 			var scopedServices = scope.ServiceProvider;
 			var appDbContext = scopedServices.GetRequiredService<AppDbContext>();
 
+			appDbContext.Database.EnsureDeleted();
 			appDbContext.Database.EnsureCreated();
 
 			SeedDatabase(appDbContext);

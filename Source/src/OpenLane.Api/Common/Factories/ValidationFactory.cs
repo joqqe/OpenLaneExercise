@@ -5,9 +5,9 @@ namespace OpenLane.Api.Common.Factories;
 public static class ValidationFactory
 {
 	public static async Task<HttpValidationProblemDetails?> GetProblemDetailsAsync<T>(
-		this IValidator<T> validator, T request, string instance)
+		this IValidator<T> validator, T request, string instance, CancellationToken cancellationToken = default)
 	{
-		var validationResult = await validator.ValidateAsync(request);
+		var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
 		if (validationResult.IsValid)
 			return null;

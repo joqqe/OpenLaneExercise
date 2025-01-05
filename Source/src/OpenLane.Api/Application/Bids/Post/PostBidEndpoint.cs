@@ -19,19 +19,20 @@ public static class PostBidEndpoint
 			[FromServices] ILogger<Program> logger,
 			[FromServices] IValidator<PostBidRequest> validator,
 			[FromServices] IHandler<PostBidRequest, Result<Bid>> handler,
+			CancellationToken cancellationToken,
 			PostBidRequest request) =>
 		{
 			ArgumentNullException.ThrowIfNull(validator);
 			ArgumentNullException.ThrowIfNull(handler);
 
-			var problemDetails = await validator.GetProblemDetailsAsync(request, Instance);
+			var problemDetails = await validator.GetProblemDetailsAsync(request, Instance, cancellationToken);
 			if (problemDetails is not null)
 			{
 				logger.LogWarning("Invalid request: {ErrorMessage}", string.Join(", ", problemDetails.Errors["ValidationErrors"]));
 				return Results.Problem(problemDetails);
 			}
 
-			var response = await handler.InvokeAsync(request);
+			var response = await handler.InvokeAsync(request, cancellationToken);
 			if (response.IsFailure)
 				return Results.Problem(response.Error, Instance, StatusCodes.Status400BadRequest, "A functional exception has occured.");
 

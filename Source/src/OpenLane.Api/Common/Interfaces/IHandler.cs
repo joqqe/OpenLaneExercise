@@ -2,5 +2,5 @@
 
 public interface IHandler<TRequest, TResponse>
 {
-	Task<TResponse> InvokeAsync(TRequest request);
+	Task<TResponse> InvokeAsync(TRequest request, CancellationToken cancellationToken = default);
 }

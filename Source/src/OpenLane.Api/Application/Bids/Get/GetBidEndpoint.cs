@@ -19,20 +19,21 @@ public static class GetBidEndpoint
 			[FromServices] ILogger<Program> logger,
 			[FromServices] IValidator<GetBidRequest> validator,
 			[FromServices] IHandler<GetBidRequest, Result<Bid?>> handler,
+			CancellationToken cancellationToken,
 			Guid objectId) =>
 		{
 			ArgumentNullException.ThrowIfNull(validator);
 			ArgumentNullException.ThrowIfNull(handler);
 			var request = new GetBidRequest(objectId);
 
-			var problemDetails = await validator.GetProblemDetailsAsync(request, Instance);
+			var problemDetails = await validator.GetProblemDetailsAsync(request, Instance, cancellationToken);
 			if (problemDetails is not null)
 			{
 				logger.LogWarning("Invalid request: {ErrorMessage}", string.Join(", ", problemDetails.Errors["ValidationErrors"]));
 				return Results.Problem(problemDetails);
 			}
 
-			var response = await handler.InvokeAsync(request);
+			var response = await handler.InvokeAsync(request, cancellationToken);
 			if (response.IsFailure)
 				return Results.Problem(response.Error, Instance, StatusCodes.Status400BadRequest, "A functional exception has occured.");
 
