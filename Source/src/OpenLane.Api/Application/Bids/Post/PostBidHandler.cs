@@ -54,7 +54,9 @@ public class PostBidHandler : IHandler<PostBidRequest, Result<Bid>>
 			return Result<Bid>.Failure(errorMessage);
 		}
 
-		var isBidLowerOrEqualThenPrevious = await _appContext.Bids.AnyAsync(x => x.UserObjectId == request.UserObjectId && x.Price >= request.Price, cancellationToken);
+		var isBidLowerOrEqualThenPrevious = await _appContext.Bids
+			.AsNoTracking()
+			.AnyAsync(x => x.UserObjectId == request.UserObjectId && x.Price >= request.Price, cancellationToken);
 		if (isBidLowerOrEqualThenPrevious)
 		{
 			var errorMessage = "There is already a higher bid.";

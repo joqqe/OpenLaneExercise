@@ -26,7 +26,9 @@ public class GetBidHandler : IHandler<GetBidRequest, Result<Bid?>>
 	{
 		ArgumentNullException.ThrowIfNull(request);
 
-		var entity = await _appContext.Bids.SingleOrDefaultAsync(x => x.ObjectId == request.ObjectId, cancellationToken);
+		var entity = await _appContext.Bids
+			.AsNoTracking()
+			.SingleOrDefaultAsync(x => x.ObjectId == request.ObjectId, cancellationToken);
 
 		if (entity is null)
 		{
