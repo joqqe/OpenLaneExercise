@@ -22,7 +22,7 @@ public class PostEndpointTests : IClassFixture<ApiWebApplicationFactory>
 		// Arrange
 		var bidPrice = 120m;
 		var requestUri = string.Format(PostBidEndpoint.InstanceFormat);
-		var bodyObject = new PostBidRequest(ApiWebApplicationFactory.OfferObjectId, bidPrice, Guid.NewGuid());
+		var bodyObject = new PostBidRequest(ApiWebApplicationFactory.OpenOffer.ObjectId, bidPrice, Guid.NewGuid());
 		var bodyString = new StringContent(JsonSerializer.Serialize(bodyObject), Encoding.UTF8, "application/json");
 		
 		// Act
@@ -40,7 +40,7 @@ public class PostEndpointTests : IClassFixture<ApiWebApplicationFactory>
 		var bid = JsonSerializer.Deserialize<BidDto>(bidString, jsonSerializerOptions);
 		bid.Should().NotBeNull();
 		bid!.Price.Should().Be(bidPrice);
-		bid!.OfferId.Should().Be(ApiWebApplicationFactory.OfferObjectId);
+		bid!.OfferId.Should().Be(ApiWebApplicationFactory.OpenOffer.ObjectId);
 	}
 
 	[Theory]
@@ -60,9 +60,9 @@ public class PostEndpointTests : IClassFixture<ApiWebApplicationFactory>
 		yield return new object[] { new PostBidRequest(Guid.NewGuid(), 0, Guid.NewGuid()) };
 		yield return new object[] { new PostBidRequest(Guid.NewGuid(), 120m, Guid.Empty) };
 		yield return new object[] { new PostBidRequest(Guid.NewGuid(), 120m, Guid.NewGuid()) };
-		yield return new object[] { new PostBidRequest(ApiWebApplicationFactory.OfferObjectId, 10m, Guid.NewGuid()) };
-		yield return new object[] { new PostBidRequest(ApiWebApplicationFactory.OfferObjectId, 110m, ApiWebApplicationFactory.UserObjectId) };
-		yield return new object[] { new PostBidRequest(ApiWebApplicationFactory.OfferObjectIdClosed, 120m, ApiWebApplicationFactory.UserObjectId) };
-		yield return new object[] { new PostBidRequest(ApiWebApplicationFactory.OfferObjectIdFuture, 120m, ApiWebApplicationFactory.UserObjectId) };
+		yield return new object[] { new PostBidRequest(ApiWebApplicationFactory.OpenOffer.ObjectId, 10m, Guid.NewGuid()) };
+		yield return new object[] { new PostBidRequest(ApiWebApplicationFactory.OpenOffer.ObjectId, 110m, ApiWebApplicationFactory.Bid.UserObjectId) };
+		yield return new object[] { new PostBidRequest(ApiWebApplicationFactory.ClosedOffer.ObjectId, 120m, ApiWebApplicationFactory.Bid.UserObjectId) };
+		yield return new object[] { new PostBidRequest(ApiWebApplicationFactory.FutureOffer.ObjectId, 120m, ApiWebApplicationFactory.Bid.UserObjectId) };
 	}
 }

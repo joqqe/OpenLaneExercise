@@ -13,11 +13,10 @@ namespace OpenLane.ApiTests;
 
 public class ApiWebApplicationFactory : WebApplicationFactory<Program>
 {
-	public static readonly Guid BidObjectId = Guid.NewGuid();
-	public static readonly Guid OfferObjectId = Guid.NewGuid();
-	public static readonly Guid OfferObjectIdClosed = Guid.NewGuid();
-	public static readonly Guid OfferObjectIdFuture = Guid.NewGuid();
-	public static readonly Guid UserObjectId = Guid.NewGuid();
+	public static readonly Offer OpenOffer = TestDataFactory.CreateOpenOffer();
+	public static readonly Offer ClosedOffer = TestDataFactory.CreateClosedOffer();
+	public static readonly Offer FutureOffer = TestDataFactory.CreateFutureOffer();
+	public static readonly Bid Bid = TestDataFactory.CreateBid(OpenOffer);
 	private readonly MsSqlContainer _msSqlContainer;
 	private readonly RabbitMqContainer _rabbitMqContainer;
 
@@ -69,61 +68,10 @@ public class ApiWebApplicationFactory : WebApplicationFactory<Program>
 
 	private void SeedDatabase(AppDbContext appDbContext)
 	{
-		// Open offer
-		var productA = new Product
-		{
-			ObjectId = Guid.NewGuid(),
-			Name = "ProductA"
-		};
-		var openOffer = new Offer
-		{
-			ObjectId = OfferObjectId,
-			Product = productA,
-			StartingPrice = 100m,
-			OpensAt = DateTimeOffset.Now,
-			ClosesAt = DateTimeOffset.Now.AddMonths(1)
-		};
-		var newBid = new Bid
-		{
-			ObjectId = BidObjectId,
-			Offer = openOffer,
-			Price = 110m,
-			ReceivedAt = DateTimeOffset.Now,
-			UserObjectId = UserObjectId
-		};
-		appDbContext.Bids.Add(newBid);
-
-		// Closed offer
-		var productB = new Product
-		{
-			ObjectId = Guid.NewGuid(),
-			Name = "ProductB"
-		};
-		var closedOffer = new Offer
-		{
-			ObjectId = OfferObjectIdClosed,
-			Product = productB,
-			StartingPrice = 100m,
-			OpensAt = DateTimeOffset.Now.AddMonths(-2),
-			ClosesAt = DateTimeOffset.Now.AddMonths(-1)
-		};
-		appDbContext.Offers.Add(closedOffer);
-
-		// Future offer
-		var productC = new Product
-		{
-			ObjectId = Guid.NewGuid(),
-			Name = "ProductC"
-		};
-		var futureOffer = new Offer
-		{
-			ObjectId = OfferObjectIdFuture,
-			Product = productC,
-			StartingPrice = 100m,
-			OpensAt = DateTimeOffset.Now.AddMonths(1),
-			ClosesAt = DateTimeOffset.Now.AddMonths(2)
-		};
-		appDbContext.Offers.Add(futureOffer);
+		appDbContext.Offers.Add(OpenOffer);
+		appDbContext.Offers.Add(ClosedOffer);
+		appDbContext.Offers.Add(FutureOffer);
+		appDbContext.Bids.Add(Bid);
 
 		appDbContext.SaveChanges();
 	}
