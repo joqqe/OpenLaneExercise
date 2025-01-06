@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using OpenLane.Api.Application.Bids.Post;
+using OpenLane.Api.Application.Dtos;
 using System.Net;
 using System.Text;
 using System.Text.Json;
@@ -18,13 +19,28 @@ public class PostEndpointTests : IClassFixture<ApiWebApplicationFactory>
 	[Fact]
 	public async Task PostBids_ShouldReturn_201Created()
 	{
+		// Arrange
+		var bidPrice = 120m;
 		var requestUri = string.Format(PostBidEndpoint.InstanceFormat);
-
-		var bodyObject = new PostBidRequest(ApiWebApplicationFactory.OfferObjectId, 120m, Guid.NewGuid());
+		var bodyObject = new PostBidRequest(ApiWebApplicationFactory.OfferObjectId, bidPrice, Guid.NewGuid());
 		var bodyString = new StringContent(JsonSerializer.Serialize(bodyObject), Encoding.UTF8, "application/json");
-		var response = await _client.PostAsync(requestUri, bodyString);
+		
+		// Act
+		var postResponse = await _client.PostAsync(requestUri, bodyString);
 
-		response.StatusCode.Should().Be(HttpStatusCode.Created);
+		// Assert
+		postResponse.StatusCode.Should().Be(HttpStatusCode.Created);
+
+		postResponse.Headers?.Location?.OriginalString.Should().NotBeNull();
+		var getResponse = await _client.GetAsync(postResponse.Headers!.Location!.OriginalString);
+		getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+
+		var bidString = await getResponse.Content.ReadAsStringAsync();
+		var jsonSerializerOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+		var bid = JsonSerializer.Deserialize<BidDto>(bidString, jsonSerializerOptions);
+		bid.Should().NotBeNull();
+		bid!.Price.Should().Be(bidPrice);
+		bid!.OfferId.Should().Be(ApiWebApplicationFactory.OfferObjectId);
 	}
 
 	[Theory]

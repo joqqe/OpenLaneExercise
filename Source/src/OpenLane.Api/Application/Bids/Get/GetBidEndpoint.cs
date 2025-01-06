@@ -40,7 +40,7 @@ public static class GetBidEndpoint
 			if (response.Value is null)
 				return Results.NotFound();
 
-			var dto = new BidDto(response.Value.ObjectId, response.Value.Price, response.Value.UserObjectId);
+			var dto = new BidDto(response.Value.ObjectId, response.Value.Price, response.Value.Offer.ObjectId);
 			logger.LogInformation("Successfuly send bid dto.");
 			return Results.Ok(dto);
 		})
