@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace OpenLane.Api.Infrastructure;
+namespace OpenLane.Infrastructure;
 
 public static class ConfigureInfraExtentions
 {

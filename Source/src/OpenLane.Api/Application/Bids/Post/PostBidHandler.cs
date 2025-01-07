@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using OpenLane.Api.Common;
 using OpenLane.Api.Common.Interfaces;
-using OpenLane.Api.Infrastructure;
+using OpenLane.Infrastructure;
 using OpenLane.Domain;
 using OpenLane.Domain.Messages;
 

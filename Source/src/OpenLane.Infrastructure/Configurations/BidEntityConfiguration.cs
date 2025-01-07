@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using OpenLane.Domain;
 
-namespace OpenLane.Api.Infrastructure.Configurations;
+namespace OpenLane.Infrastructure.Configurations;
 
 public class BidEntityConfiguration : IEntityTypeConfiguration<Bid>
 {

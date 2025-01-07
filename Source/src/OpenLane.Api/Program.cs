@@ -1,6 +1,6 @@
 using OpenLane.Api.Application.Bids;
 using OpenLane.Api.Common.Exceptions;
-using OpenLane.Api.Infrastructure;
+using OpenLane.Infrastructure;
 using MassTransit;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;

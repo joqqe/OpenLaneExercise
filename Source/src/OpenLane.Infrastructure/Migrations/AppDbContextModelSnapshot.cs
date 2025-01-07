@@ -3,20 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using OpenLane.Api.Infrastructure;
+using OpenLane.Infrastructure;
 
 #nullable disable
 
-namespace OpenLane.Api.Infrastructure.Migrations
+namespace OpenLane.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250101120944_InitialCreate")]
-    partial class InitialCreate
+    partial class AppDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -45,7 +42,7 @@ namespace OpenLane.Api.Infrastructure.Migrations
                     b.Property<DateTimeOffset>("ReceivedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("User")
+                    b.Property<Guid>("UserObjectId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");

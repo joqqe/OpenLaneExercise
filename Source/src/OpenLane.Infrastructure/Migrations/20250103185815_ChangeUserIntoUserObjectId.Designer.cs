@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using OpenLane.Api.Infrastructure;
+using OpenLane.Infrastructure;
 
 #nullable disable
 
-namespace OpenLane.Api.Infrastructure.Migrations
+namespace OpenLane.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20250103185815_ChangeUserIntoUserObjectId")]

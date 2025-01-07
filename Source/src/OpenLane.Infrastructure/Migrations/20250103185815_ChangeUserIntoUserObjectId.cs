@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace OpenLane.Api.Infrastructure.Migrations
+namespace OpenLane.Infrastructure.Migrations
 {
     /// <inheritdoc />
     public partial class ChangeUserIntoUserObjectId : Migration

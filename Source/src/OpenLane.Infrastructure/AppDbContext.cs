@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OpenLane.Domain;
-using OpenLane.Api.Infrastructure.Configurations;
+using OpenLane.Infrastructure.Configurations;
 
-namespace OpenLane.Api.Infrastructure;
+namespace OpenLane.Infrastructure;
 
 public class AppDbContext : DbContext
 {

@@ -2,7 +2,7 @@
 using OpenLane.Api.Common;
 using OpenLane.Api.Common.Interfaces;
 using OpenLane.Domain;
-using OpenLane.Api.Infrastructure;
+using OpenLane.Infrastructure;
 
 namespace OpenLane.Api.Application.Bids.Get;
 
