@@ -1,10 +1,11 @@
 ﻿using FluentValidation;
 using OpenLane.Api.Application.Bids.Get;
-using OpenLane.Api.Common.Interfaces;
-using OpenLane.Api.Common;
 using OpenLane.Api.Common.Factories;
 using Microsoft.AspNetCore.Mvc;
-using OpenLane.Domain;
+using MassTransit;
+using OpenLane.Domain.Messages;
+using OpenLane.Common;
+using OpenLane.Common.Interfaces;
 
 namespace OpenLane.Api.Application.Bids.Post;
 
@@ -18,12 +19,14 @@ public static class PostBidEndpoint
 		app.MapPost(Instance, async (
 			[FromServices] ILogger<Program> logger,
 			[FromServices] IValidator<PostBidRequest> validator,
-			[FromServices] IHandler<PostBidRequest, Result<Bid>> handler,
+			[FromServices] IHandler<PostBidRequest, Result> handler,
+			[FromServices] IBus bus,
 			CancellationToken cancellationToken,
 			PostBidRequest request) =>
 		{
+			ArgumentNullException.ThrowIfNull(logger);
 			ArgumentNullException.ThrowIfNull(validator);
-			ArgumentNullException.ThrowIfNull(handler);
+			ArgumentNullException.ThrowIfNull(bus);
 
 			var problemDetails = await validator.GetProblemDetailsAsync(request, Instance, cancellationToken);
 			if (problemDetails is not null)
@@ -32,16 +35,16 @@ public static class PostBidEndpoint
 				return Results.Problem(problemDetails);
 			}
 
-			var response = await handler.InvokeAsync(request, cancellationToken);
-			if (response.IsFailure)
-				return Results.Problem(response.Error, Instance, StatusCodes.Status400BadRequest, "A functional exception has occured.");
+			var bidObjectId = Guid.NewGuid();
+			var postBidRequest = new PostBidRequest(bidObjectId, request.OfferObjectId, request.Price, request.UserObjectId);
+			await handler.InvokeAsync(postBidRequest, cancellationToken);
 
-			logger.LogInformation("Successfuly send created response.");
+			logger.LogInformation("Successfuly send bid accepted.");
 
-			return Results.Created(string.Format(GetBidEndpoint.InstanceFormat, response.Value!.ObjectId), request);
+			return Results.Accepted(string.Format(GetBidEndpoint.InstanceFormat, bidObjectId), request);
 		})
 		.WithName("PostBid")
-		.Produces(StatusCodes.Status201Created)
+		.Produces(StatusCodes.Status202Accepted)
 		.Produces(StatusCodes.Status400BadRequest)
 		.ProducesValidationProblem()
 		.WithOpenApi();

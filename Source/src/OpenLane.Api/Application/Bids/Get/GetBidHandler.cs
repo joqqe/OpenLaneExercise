@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using OpenLane.Api.Common;
-using OpenLane.Api.Common.Interfaces;
+using OpenLane.Common;
+using OpenLane.Common.Interfaces;
 using OpenLane.Domain;
 using OpenLane.Infrastructure;
 

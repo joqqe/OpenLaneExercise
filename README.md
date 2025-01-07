@@ -66,6 +66,7 @@ docker run -it --rm --name aspire-dashboard -p 18888:18888 -p 4317:18889 -e DOTN
 3. Start test by: ```k6 run .\load_test.js --insecure-skip-tls-verify```
 
 ## Todos
+- Add SignalR
 - IdempotencyKey (Add unique key to post -and put calls and messageConsumers)
 - Add unit test for message consumers
 - Fix duplicate testcontairs unit-tests

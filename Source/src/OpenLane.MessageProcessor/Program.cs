@@ -1,4 +1,9 @@
 using MassTransit;
+using OpenLane.Common;
+using OpenLane.Common.Interfaces;
+using OpenLane.Domain;
+using OpenLane.Infrastructure;
+using OpenLane.MessageProcessor.Handlers;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -43,10 +48,13 @@ builder.Services.AddMassTransit(config =>
 	{
 		cfg.Host(builder.Configuration.GetConnectionString("MessageQueue"));
 		cfg.ConfigureEndpoints(ctx);
-		cfg.UseRateLimit(250, TimeSpan.FromSeconds(5));
+		cfg.UseRateLimit(50, TimeSpan.FromSeconds(5));
 		cfg.Durable = true;
 	});
 });
+
+builder.Services.AddInfra(builder.Configuration);
+builder.Services.AddScoped<IHandler<CreateBidRequest, Result<Bid>>, CreateBidHandler>();
 
 var app = builder.Build();
 

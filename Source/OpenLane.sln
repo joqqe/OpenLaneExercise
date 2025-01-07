@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenLane.Domain", "src\Open
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenLane.Infrastructure", "src\OpenLane.Infrastructure\OpenLane.Infrastructure.csproj", "{FE3D4AE6-A218-443E-A952-3FFAF6F291C6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenLane.Common", "src\OpenLane.Common\OpenLane.Common.csproj", "{C433B0BA-0FF0-40C7-A150-822A6060E279}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +45,10 @@ Global
 		{FE3D4AE6-A218-443E-A952-3FFAF6F291C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FE3D4AE6-A218-443E-A952-3FFAF6F291C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FE3D4AE6-A218-443E-A952-3FFAF6F291C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C433B0BA-0FF0-40C7-A150-822A6060E279}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C433B0BA-0FF0-40C7-A150-822A6060E279}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C433B0BA-0FF0-40C7-A150-822A6060E279}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C433B0BA-0FF0-40C7-A150-822A6060E279}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -53,5 +59,6 @@ Global
 		{32A4A9D0-9699-40EC-BBFC-7E6E2E6ED638} = {62D6FB52-114F-4C27-878D-EF447968F7F4}
 		{96B4BAFE-073F-497A-A0DD-EA5DA3FF4460} = {62D6FB52-114F-4C27-878D-EF447968F7F4}
 		{FE3D4AE6-A218-443E-A952-3FFAF6F291C6} = {62D6FB52-114F-4C27-878D-EF447968F7F4}
+		{C433B0BA-0FF0-40C7-A150-822A6060E279} = {62D6FB52-114F-4C27-878D-EF447968F7F4}
 	EndGlobalSection
 EndGlobal

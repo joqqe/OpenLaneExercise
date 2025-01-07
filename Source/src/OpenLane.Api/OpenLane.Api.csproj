@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\OpenLane.Common\OpenLane.Common.csproj" />
     <ProjectReference Include="..\OpenLane.Domain\OpenLane.Domain.csproj" />
     <ProjectReference Include="..\OpenLane.Infrastructure\OpenLane.Infrastructure.csproj" />
   </ItemGroup>

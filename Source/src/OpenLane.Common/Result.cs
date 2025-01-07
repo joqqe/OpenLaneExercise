@@ -1,4 +1,4 @@
-﻿namespace OpenLane.Api.Common;
+﻿namespace OpenLane.Common;
 
 public record Result
 {

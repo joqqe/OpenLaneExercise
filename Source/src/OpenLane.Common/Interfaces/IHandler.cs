@@ -1,4 +1,4 @@
-﻿namespace OpenLane.Api.Common.Interfaces;
+﻿namespace OpenLane.Common.Interfaces;
 
 public interface IHandler<TRequest, TResponse>
 {

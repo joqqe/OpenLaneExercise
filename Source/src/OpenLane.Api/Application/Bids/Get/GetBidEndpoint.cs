@@ -1,8 +1,8 @@
 ﻿using FluentValidation;
-using OpenLane.Api.Common.Interfaces;
+using OpenLane.Common.Interfaces;
 using OpenLane.Api.Common.Factories;
 using OpenLane.Api.Application.Dtos;
-using OpenLane.Api.Common;
+using OpenLane.Common;
 using Microsoft.AspNetCore.Mvc;
 using OpenLane.Domain;
 
