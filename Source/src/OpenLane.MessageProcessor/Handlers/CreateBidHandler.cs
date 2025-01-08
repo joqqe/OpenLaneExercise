@@ -68,7 +68,6 @@ public class CreateBidHandler : IHandler<CreateBidRequest, Result<Bid>>
 			UserObjectId = request.UserObjectId,
 			ReceivedAt = DateTimeOffset.Now
 		};
-
 		await _appContext.Bids.AddAsync(newBid, cancellationToken);
 		await _appContext.SaveChangesAsync(cancellationToken);
 

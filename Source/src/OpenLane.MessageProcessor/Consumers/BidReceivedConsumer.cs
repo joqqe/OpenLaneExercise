@@ -24,6 +24,8 @@ public class BidReceivedConsumer : IConsumer<BidReceivedMessage>
 
 	public async Task Consume(ConsumeContext<BidReceivedMessage> context)
 	{
+		// Todo: add validation
+
 		_logger.LogInformation("{Consumer}: {Message}", nameof(BidReceivedConsumer), JsonSerializer.Serialize(context.Message));
 
 		var request = new CreateBidRequest(context.Message.BidObjectId, context.Message.OfferObjectId, context.Message.Price, context.Message.UserObjectId);

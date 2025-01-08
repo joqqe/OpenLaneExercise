@@ -35,13 +35,12 @@ public static class PostBidEndpoint
 				return Results.Problem(problemDetails);
 			}
 
-			var bidObjectId = Guid.NewGuid();
-			var postBidRequest = new PostBidRequest(bidObjectId, request.OfferObjectId, request.Price, request.UserObjectId);
+			var postBidRequest = new PostBidRequest(request.BidObjectId, request.OfferObjectId, request.Price, request.UserObjectId);
 			await handler.InvokeAsync(postBidRequest, cancellationToken);
 
 			logger.LogInformation("Successfuly send bid accepted.");
 
-			return Results.Accepted(string.Format(GetBidEndpoint.InstanceFormat, bidObjectId), request);
+			return Results.Accepted(string.Format(GetBidEndpoint.InstanceFormat, request.BidObjectId), request);
 		})
 		.WithName("PostBid")
 		.Produces(StatusCodes.Status202Accepted)

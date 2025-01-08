@@ -6,11 +6,11 @@ using System.Text.Json;
 
 namespace OpenLane.ApiTests.Endpoints;
 
-public class BidEndpointTests : IClassFixture<ApiWebApplicationFactory>
+public class GetBidEndpointTests : IClassFixture<ApiWebApplicationFactory>
 {
 	private readonly HttpClient _client;
 
-	public BidEndpointTests(ApiWebApplicationFactory application)
+	public GetBidEndpointTests(ApiWebApplicationFactory application)
 	{
 		_client = application.CreateClient();
 	}

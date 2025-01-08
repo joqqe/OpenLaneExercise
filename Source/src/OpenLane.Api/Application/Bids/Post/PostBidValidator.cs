@@ -6,6 +6,10 @@ public class PostBidValidator : AbstractValidator<PostBidRequest>
 {
 	public PostBidValidator()
 	{
+		RuleFor(x => x.BidObjectId)
+			.NotNull().WithMessage("BidObjectId is required.")
+			.NotEmpty().WithMessage("BidObjectId can't be empty.");
+
 		RuleFor(x => x.OfferObjectId)
 			.NotNull().WithMessage("OfferObjectId is required.")
 			.NotEmpty().WithMessage("OfferObjectId can't be empty.");

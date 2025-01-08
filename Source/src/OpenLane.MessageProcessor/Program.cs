@@ -69,3 +69,6 @@ app.UseHttpsRedirection();
 app.MapHealthChecks("/api/health");
 
 app.Run();
+
+// For testing purposes
+public partial class Program { }

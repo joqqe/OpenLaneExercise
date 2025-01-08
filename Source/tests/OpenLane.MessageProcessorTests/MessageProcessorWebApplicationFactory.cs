@@ -1,18 +1,19 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using OpenLane.Domain;
 using OpenLane.Infrastructure;
 using Testcontainers.MsSql;
 using Testcontainers.RabbitMq;
 using MassTransit;
+using OpenLane.MessageProcessor.Consumers;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Xunit.Sdk;
 
-namespace OpenLane.ApiTests;
-
-public class ApiWebApplicationFactory : WebApplicationFactory<Program>
+namespace OpenLane.MessageProcessorTests;
+public class MessageProcessorWebApplicationFactory : WebApplicationFactory<Program>
 {
 	public static readonly Offer OpenOffer = TestDataFactory.CreateOpenOffer();
 	public static readonly Offer ClosedOffer = TestDataFactory.CreateClosedOffer();
@@ -21,7 +22,7 @@ public class ApiWebApplicationFactory : WebApplicationFactory<Program>
 	private readonly MsSqlContainer _msSqlContainer;
 	private readonly RabbitMqContainer _rabbitMqContainer;
 
-	public ApiWebApplicationFactory()
+	public MessageProcessorWebApplicationFactory()
 	{
 		_msSqlContainer = new MsSqlBuilder().Build();
 		_rabbitMqContainer = new RabbitMqBuilder().Build();
@@ -45,6 +46,7 @@ public class ApiWebApplicationFactory : WebApplicationFactory<Program>
 			var configuration = new ConfigurationBuilder()
 				.AddInMemoryCollection(new Dictionary<string, string?>
 				{
+					{ "Logging:LogLevel:Default" , "Warning"},
 					{ "ConnectionStrings:AppDB", _msSqlContainer.GetConnectionString() },
 					{ "ConnectionStrings:MessageQueue", _rabbitMqContainer.GetConnectionString() }
 				})
@@ -59,7 +61,10 @@ public class ApiWebApplicationFactory : WebApplicationFactory<Program>
 				builder.ClearProviders()
 			);
 
-			services.AddMassTransitTestHarness();
+			services.AddMassTransitTestHarness(cfg =>
+			{
+				cfg.AddConsumer<BidReceivedConsumer>();
+			});
 		});
 
 		builder.ConfigureTestServices(services =>
