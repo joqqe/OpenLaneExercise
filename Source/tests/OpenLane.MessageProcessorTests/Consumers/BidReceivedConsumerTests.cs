@@ -38,6 +38,8 @@ public class BidReceivedConsumerTests : IClassFixture<MessageProcessorWebApplica
 		var consumerHarness = harness.GetConsumerHarness<BidReceivedConsumer>();
 		(await consumerHarness.Consumed.Any<BidReceivedMessage>()).Should().Be(true);
 
+		(await harness.Published.Any<BidCreatedMessage>()).Should().Be(true);
+
 		var bid = await appDbContext.Bids
 			.Include(x => x.Offer)
 			.SingleOrDefaultAsync(x => x.ObjectId == message.BidObjectId);
@@ -65,6 +67,8 @@ public class BidReceivedConsumerTests : IClassFixture<MessageProcessorWebApplica
 		(await harness.Consumed.Any<BidReceivedMessage>()).Should().Be(true);
 		var consumerHarness = harness.GetConsumerHarness<BidReceivedConsumer>();
 		(await consumerHarness.Consumed.Any<BidReceivedMessage>()).Should().Be(true);
+
+		(await harness.Published.Any<BidCreatedFailedMessage>()).Should().Be(true);
 
 		var bid = await appDbContext.Bids
 			.Include(x => x.Offer)

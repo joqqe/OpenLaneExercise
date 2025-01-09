@@ -7,6 +7,7 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using FluentValidation;
+using OpenLane.Api.Hub;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,6 +47,8 @@ builder.Services.AddMassTransit(config =>
 {
 	config.SetKebabCaseEndpointNameFormatter();
 
+	config.AddConsumers(typeof(Program).Assembly);
+
 	config.UsingRabbitMq((ctx, cfg) =>
 	{
 		cfg.Host(builder.Configuration.GetConnectionString("MessageQueue"));
@@ -53,6 +56,8 @@ builder.Services.AddMassTransit(config =>
 		cfg.Durable = true;
 	});
 });
+
+builder.Services.AddSignalR();
 
 builder.Services.AddInfra(builder.Configuration);
 builder.Services.AddBids();
@@ -70,9 +75,11 @@ if (app.Environment.IsDevelopment())
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 
-app.MapHealthChecks("/api/health");
-
 app.UseHttpsRedirection();
+
+app.MapHealthChecks("/api/health");
+app.MapHub<NotificationHub>("/api/notification");
+
 app.UseBids();
 
 app.Run();
