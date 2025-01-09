@@ -10,8 +10,8 @@ public static class ConfigureBidsExtensions
 {
 	public static IServiceCollection AddBids(this IServiceCollection services)
 	{
-		services.AddScoped<IHandler<GetBidRequest, Result<Bid?>>, GetBidHandler>();
-		services.AddScoped<IHandler<PostBidRequest, Result>, PostBidHandler>();
+		services.AddScoped<IHandler<GetBidHandleRequest, Result<Bid?>>, GetBidHandler>();
+		services.AddScoped<IHandler<PostBidHandleRequest, Result>, PostBidHandler>();
 
 		return services;
 	}

@@ -6,9 +6,9 @@ using OpenLane.Infrastructure;
 
 namespace OpenLane.Api.Application.Bids.Get;
 
-public record GetBidRequest(Guid ObjectId);
+public record GetBidHandleRequest(Guid ObjectId);
 
-public class GetBidHandler : IHandler<GetBidRequest, Result<Bid?>>
+public class GetBidHandler : IHandler<GetBidHandleRequest, Result<Bid?>>
 {
 	private readonly ILogger<GetBidHandler> _logger;
 	private readonly AppDbContext _appContext;
@@ -22,7 +22,7 @@ public class GetBidHandler : IHandler<GetBidRequest, Result<Bid?>>
 		_appContext = appContext;
 	}
 
-	public async Task<Result<Bid?>> InvokeAsync(GetBidRequest request, CancellationToken cancellationToken = default)
+	public async Task<Result<Bid?>> InvokeAsync(GetBidHandleRequest request, CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(request);
 

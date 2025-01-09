@@ -17,14 +17,14 @@ public static class GetBidEndpoint
 	{
 		app.MapGet(Instance, async (
 			[FromServices] ILogger<Program> logger,
-			[FromServices] IValidator<GetBidRequest> validator,
-			[FromServices] IHandler<GetBidRequest, Result<Bid?>> handler,
+			[FromServices] IValidator<GetBidHandleRequest> validator,
+			[FromServices] IHandler<GetBidHandleRequest, Result<Bid?>> handler,
 			CancellationToken cancellationToken,
 			Guid objectId) =>
 		{
 			ArgumentNullException.ThrowIfNull(validator);
 			ArgumentNullException.ThrowIfNull(handler);
-			var request = new GetBidRequest(objectId);
+			var request = new GetBidHandleRequest(objectId);
 
 			var problemDetails = await validator.GetProblemDetailsAsync(request, Instance, cancellationToken);
 			if (problemDetails is not null)

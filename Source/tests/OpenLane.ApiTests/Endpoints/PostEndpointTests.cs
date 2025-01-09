@@ -31,7 +31,9 @@ public class PostEndpointTests : IClassFixture<ApiWebApplicationFactory>
 		var requestUri = string.Format(PostBidEndpoint.InstanceFormat);
 		var bodyObject = new PostBidRequest(bidObjectId, ApiWebApplicationFactory.OpenOffer.ObjectId, bidPrice, Guid.NewGuid());
 		var bodyString = new StringContent(JsonSerializer.Serialize(bodyObject), Encoding.UTF8, "application/json");
-		
+
+		_client.DefaultRequestHeaders.Add("Idempotency-Key", Guid.NewGuid().ToString());
+
 		// Act
 		var postResponse = await _client.PostAsync(requestUri, bodyString);
 
@@ -43,14 +45,39 @@ public class PostEndpointTests : IClassFixture<ApiWebApplicationFactory>
 	}
 
 	[Theory]
+	[InlineData(null)]
+	[InlineData("")]
+	[InlineData("123")]
+	public async Task PostBids_Invalid_IdempotencyKey_ShouldFail(string idempotency)
+	{
+		var harness = _application.Services.GetRequiredService<ITestHarness>();
+
+		// Arrange
+		var bidObjectId = Guid.NewGuid();
+		var bidPrice = 120m;
+		var requestUri = string.Format(PostBidEndpoint.InstanceFormat);
+		var bodyObject = new PostBidRequest(bidObjectId, ApiWebApplicationFactory.OpenOffer.ObjectId, bidPrice, Guid.NewGuid());
+		var bodyString = new StringContent(JsonSerializer.Serialize(bodyObject), Encoding.UTF8, "application/json");
+
+		_client.DefaultRequestHeaders.Add("Idempotency-Key", idempotency);
+
+		// Act
+		var postResponse = await _client.PostAsync(requestUri, bodyString);
+
+		// Assert
+		postResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+	}
+	
+	[Theory]
 	[MemberData(nameof(GetBadRequestData))]
 	public async Task PostBids_ShouldReturn_400BadRequest(PostBidRequest bodyObject)
 	{
 		var harness = _application.Services.GetRequiredService<ITestHarness>();
 
 		var requestUri = string.Format(PostBidEndpoint.InstanceFormat);
-
 		var bodyString = new StringContent(JsonSerializer.Serialize(bodyObject), Encoding.UTF8, "application/json");
+		_client.DefaultRequestHeaders.Add("Idempotency-Key", Guid.NewGuid().ToString());
+
 		var response = await _client.PostAsync(requestUri, bodyString);
 
 		response.StatusCode.Should().Be(HttpStatusCode.BadRequest);

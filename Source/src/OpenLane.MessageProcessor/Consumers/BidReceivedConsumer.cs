@@ -5,6 +5,7 @@ using OpenLane.Domain;
 using OpenLane.Domain.Messages;
 using OpenLane.MessageProcessor.Handlers;
 using System.Text.Json;
+using OpenLane.Domain.Services;
 
 namespace OpenLane.MessageProcessor.Consumers;
 
@@ -13,8 +14,10 @@ public class BidReceivedConsumer : IConsumer<BidReceivedMessage>
 	private readonly ILogger<BidReceivedConsumer> _logger;
 	private readonly IHandler<CreateBidRequest, Result<Bid>> _handler;
 	private readonly IBus _bus;
+	private readonly IIdempotencyService _idempotencyService;
 
-	public BidReceivedConsumer(ILogger<BidReceivedConsumer> logger, IHandler<CreateBidRequest, Result<Bid>> handler, IBus bus)
+	public BidReceivedConsumer(ILogger<BidReceivedConsumer> logger, IHandler<CreateBidRequest, 
+		Result<Bid>> handler, IBus bus, IIdempotencyService idempotencyService)
 	{
 		ArgumentNullException.ThrowIfNull(logger);
 		ArgumentNullException.ThrowIfNull(handler);
@@ -22,6 +25,7 @@ public class BidReceivedConsumer : IConsumer<BidReceivedMessage>
 		_logger = logger;
 		_handler = handler;
 		_bus = bus;
+		_idempotencyService = idempotencyService;
 	}
 
 	public async Task Consume(ConsumeContext<BidReceivedMessage> context)
@@ -45,6 +49,8 @@ public class BidReceivedConsumer : IConsumer<BidReceivedMessage>
 
 		var createdMessage = new BidCreatedMessage(result.Value!.ObjectId, result.Value.Offer.ObjectId, result.Value.Price, result.Value.UserObjectId);
 		await _bus.Publish(createdMessage);
+
+		await _idempotencyService.MarkRequestAsProcessedAsync(context.Message.IdempotencyKey.ToString());
 
 		_logger.LogInformation("Successfuly consumed {Consumer}: {Message}", nameof(BidReceivedConsumer), JsonSerializer.Serialize(context.Message));
 	}

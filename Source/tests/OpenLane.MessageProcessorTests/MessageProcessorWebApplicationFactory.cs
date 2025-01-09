@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit.Sdk;
+using Testcontainers.Redis;
 
 namespace OpenLane.MessageProcessorTests;
 public class MessageProcessorWebApplicationFactory : WebApplicationFactory<Program>
@@ -21,20 +22,22 @@ public class MessageProcessorWebApplicationFactory : WebApplicationFactory<Progr
 	public static readonly Bid Bid = TestDataFactory.CreateBid(OpenOffer);
 	private readonly MsSqlContainer _msSqlContainer;
 	private readonly RabbitMqContainer _rabbitMqContainer;
+	private readonly RedisContainer _redisContainer;
 
 	public MessageProcessorWebApplicationFactory()
 	{
 		_msSqlContainer = new MsSqlBuilder().Build();
 		_rabbitMqContainer = new RabbitMqBuilder().Build();
+		_redisContainer = new RedisBuilder().Build();
 
-		Task.WhenAll([_msSqlContainer.StartAsync(), _rabbitMqContainer.StartAsync()])
+		Task.WhenAll([_msSqlContainer.StartAsync(), _rabbitMqContainer.StartAsync(), _redisContainer.StartAsync()])
 			.GetAwaiter().GetResult();
 	}
 
 	public override async ValueTask DisposeAsync()
 	{
-		await Task.WhenAll([_msSqlContainer.StopAsync(), _rabbitMqContainer.StopAsync()]);
-		await Task.WhenAll([_msSqlContainer.DisposeAsync().AsTask(), _rabbitMqContainer.DisposeAsync().AsTask()]);
+		await Task.WhenAll([_msSqlContainer.StopAsync(), _rabbitMqContainer.StopAsync(), _redisContainer.StopAsync()]);
+		await Task.WhenAll([_msSqlContainer.DisposeAsync().AsTask(), _rabbitMqContainer.DisposeAsync().AsTask(), _redisContainer.DisposeAsync().AsTask()]);
 
 		await base.DisposeAsync();
 	}
@@ -46,9 +49,9 @@ public class MessageProcessorWebApplicationFactory : WebApplicationFactory<Progr
 			var configuration = new ConfigurationBuilder()
 				.AddInMemoryCollection(new Dictionary<string, string?>
 				{
-					{ "Logging:LogLevel:Default" , "Warning"},
 					{ "ConnectionStrings:AppDB", _msSqlContainer.GetConnectionString() },
-					{ "ConnectionStrings:MessageQueue", _rabbitMqContainer.GetConnectionString() }
+					{ "ConnectionStrings:MessageQueue", _rabbitMqContainer.GetConnectionString() },
+					{ "ConnectionStrings:DistributedCache", _redisContainer.GetConnectionString() }
 				})
 				.Build();
 

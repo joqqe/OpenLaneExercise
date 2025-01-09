@@ -27,7 +27,7 @@ public class BidReceivedConsumerTests : IClassFixture<MessageProcessorWebApplica
 
 		// Arrange
 		var message = new BidReceivedMessage(
-			Guid.NewGuid(), MessageProcessorWebApplicationFactory.OpenOffer.ObjectId, 120m, Guid.NewGuid());
+			Guid.NewGuid(), Guid.NewGuid(), MessageProcessorWebApplicationFactory.OpenOffer.ObjectId, 120m, Guid.NewGuid());
 
 		// Act
 		await harness.Bus.Publish(message);
@@ -79,12 +79,14 @@ public class BidReceivedConsumerTests : IClassFixture<MessageProcessorWebApplica
 	public static IEnumerable<object[]> GetBadMessageData()
 	{
 		yield return new object[] { new BidReceivedMessage(
-			Guid.NewGuid(), Guid.NewGuid(), 120m, Guid.NewGuid()) };
+			Guid.Empty, Guid.NewGuid(), Guid.NewGuid(), 120m, Guid.NewGuid()) };
 		yield return new object[] { new BidReceivedMessage(
-			Guid.NewGuid(), MessageProcessorWebApplicationFactory.ClosedOffer.ObjectId, 120m, Guid.NewGuid()) };
+			Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), 120m, Guid.NewGuid()) };
 		yield return new object[] { new BidReceivedMessage(
-			Guid.NewGuid(), MessageProcessorWebApplicationFactory.FutureOffer.ObjectId, 120m, Guid.NewGuid()) };
+			Guid.NewGuid(), Guid.NewGuid(), MessageProcessorWebApplicationFactory.ClosedOffer.ObjectId, 120m, Guid.NewGuid()) };
 		yield return new object[] { new BidReceivedMessage(
-			Guid.NewGuid(), MessageProcessorWebApplicationFactory.OpenOffer.ObjectId, 50m, Guid.NewGuid()) };
+			Guid.NewGuid(), Guid.NewGuid(), MessageProcessorWebApplicationFactory.FutureOffer.ObjectId, 120m, Guid.NewGuid()) };
+		yield return new object[] { new BidReceivedMessage(
+			Guid.NewGuid(), Guid.NewGuid(), MessageProcessorWebApplicationFactory.OpenOffer.ObjectId, 50m, Guid.NewGuid()) };
 	}
 }

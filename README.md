@@ -13,6 +13,9 @@ docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 -d rabbitmq:4.0-
 ### Logging (Aspire Dashboard)
 docker run -it --rm --name aspire-dashboard -p 18888:18888 -p 4317:18889 -e DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS="true" -d mcr.microsoft.com/dotnet/aspire-dashboard:8.1.0
 
+### Redis Cache
+docker run -d -p 6379:6379 --name redis  redis
+
 ## Running Project Locally
 ### Database
 1. Ensure your connectionstring in `appsettings.json` point to a local SQL Server instance.
@@ -66,8 +69,7 @@ docker run -it --rm --name aspire-dashboard -p 18888:18888 -p 4317:18889 -e DOTN
 3. Start test by: ```k6 run .\load_test.js --insecure-skip-tls-verify```
 
 ## Todos
-- Add SignalR
-- Idempotency-Key header (Add unique key to post -and put calls and messageConsumers)
+- Add more IdempotencyKey tests
 - Fix duplicate testcontairs unit-tests
 - Add missing endpoints
     - Update load-test when missing endpoints are implemented, so Prepare-Database.sql can be removed

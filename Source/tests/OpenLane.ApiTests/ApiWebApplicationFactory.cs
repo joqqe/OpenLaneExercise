@@ -10,6 +10,7 @@ using Testcontainers.MsSql;
 using Testcontainers.RabbitMq;
 using MassTransit;
 using OpenLane.Api.Application.Bids.Consumers;
+using Testcontainers.Redis;
 
 namespace OpenLane.ApiTests;
 
@@ -21,20 +22,22 @@ public class ApiWebApplicationFactory : WebApplicationFactory<Program>
 	public static readonly Bid Bid = TestDataFactory.CreateBid(OpenOffer);
 	private readonly MsSqlContainer _msSqlContainer;
 	private readonly RabbitMqContainer _rabbitMqContainer;
+	private readonly RedisContainer _redisContainer;
 
 	public ApiWebApplicationFactory()
 	{
 		_msSqlContainer = new MsSqlBuilder().Build();
 		_rabbitMqContainer = new RabbitMqBuilder().Build();
+		_redisContainer = new RedisBuilder().Build();
 
-		Task.WhenAll([_msSqlContainer.StartAsync(), _rabbitMqContainer.StartAsync()])
+		Task.WhenAll([_msSqlContainer.StartAsync(), _rabbitMqContainer.StartAsync(), _redisContainer.StartAsync()])
 			.GetAwaiter().GetResult();
 	}
 
 	public override async ValueTask DisposeAsync()
 	{
-		await Task.WhenAll([_msSqlContainer.StopAsync(), _rabbitMqContainer.StopAsync()]);
-		await Task.WhenAll([_msSqlContainer.DisposeAsync().AsTask(), _rabbitMqContainer.DisposeAsync().AsTask()]);
+		await Task.WhenAll([_msSqlContainer.StopAsync(), _rabbitMqContainer.StopAsync(), _redisContainer.StopAsync()]);
+		await Task.WhenAll([_msSqlContainer.DisposeAsync().AsTask(), _rabbitMqContainer.DisposeAsync().AsTask(), _redisContainer.DisposeAsync().AsTask()]);
 
 		await base.DisposeAsync();
 	}
@@ -47,7 +50,8 @@ public class ApiWebApplicationFactory : WebApplicationFactory<Program>
 				.AddInMemoryCollection(new Dictionary<string, string?>
 				{
 					{ "ConnectionStrings:AppDB", _msSqlContainer.GetConnectionString() },
-					{ "ConnectionStrings:MessageQueue", _rabbitMqContainer.GetConnectionString() }
+					{ "ConnectionStrings:MessageQueue", _rabbitMqContainer.GetConnectionString() },
+					{ "ConnectionStrings:DistributedCache", _redisContainer.GetConnectionString() }
 				})
 				.Build();
 

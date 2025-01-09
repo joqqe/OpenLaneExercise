@@ -1,3 +1,4 @@
 ﻿namespace OpenLane.Domain.Messages;
 
-public record BidReceivedMessage(Guid BidObjectId, Guid OfferObjectId, decimal Price, Guid UserObjectId);
+public sealed record BidReceivedMessage(Guid IdempotencyKey, Guid BidObjectId, Guid OfferObjectId, decimal Price, Guid UserObjectId)
+	: IdempotencyBase(IdempotencyKey);
