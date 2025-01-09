@@ -9,6 +9,7 @@ using OpenLane.Infrastructure;
 using Testcontainers.MsSql;
 using Testcontainers.RabbitMq;
 using MassTransit;
+using OpenLane.Api.Application.Bids.Consumers;
 
 namespace OpenLane.ApiTests;
 
@@ -59,7 +60,11 @@ public class ApiWebApplicationFactory : WebApplicationFactory<Program>
 				builder.ClearProviders()
 			);
 
-			services.AddMassTransitTestHarness();
+			services.AddMassTransitTestHarness(cfg =>
+			{
+				cfg.AddConsumer<BidCreatedConsumer>();
+				cfg.AddConsumer<BidCreatedFailedConsumer>();
+			});
 		});
 
 		builder.ConfigureTestServices(services =>
