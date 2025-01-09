@@ -21,7 +21,7 @@ public class BidCreatedConsumerTests : IClassFixture<ApiWebApplicationFactory>
 	private async Task<HubConnection> CreateHubConnectionAsync()
 	{
 		var connection = new HubConnectionBuilder()
-			.WithUrl("ws://127.0.0.1/api/notification", options =>
+			.WithUrl("http://127.0.0.1/api/notification", options =>
 			{
 				options.HttpMessageHandlerFactory = _ => _application.Server.CreateHandler();
 			})
@@ -47,10 +47,6 @@ public class BidCreatedConsumerTests : IClassFixture<ApiWebApplicationFactory>
 		{
 			notification = message;
 		});
-		while (connection.State != HubConnectionState.Connected)
-		{
-			await Task.Delay(100);
-		}
 
 		// Act
 		await harness.Bus.Publish(message);
