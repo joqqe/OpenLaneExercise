@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 
 namespace OpenLane.ApiTests.Consumers;
 
+[Collection("EnvironmenCollection")]
 public class BidCreatedFailedConsumerTests : IClassFixture<ApiWebApplicationFactory>
 {
 	private readonly ApiWebApplicationFactory _application;
@@ -40,6 +41,7 @@ public class BidCreatedFailedConsumerTests : IClassFixture<ApiWebApplicationFact
 	{
 		var connection = await CreateHubConnectionAsync();
 		var harness = _application.Services.GetRequiredService<ITestHarness>();
+		var cancellationTokenSource = new CancellationTokenSource();
 
 		// Arrange
 		var message = new BidCreatedFailedMessage(
@@ -49,6 +51,7 @@ public class BidCreatedFailedConsumerTests : IClassFixture<ApiWebApplicationFact
 		connection.On<BidCreatedFailedNotification>("BidCreatedFailed", (message) =>
 		{
 			notification = message;
+			cancellationTokenSource.Cancel();
 		});
 
 		// Act
@@ -61,6 +64,9 @@ public class BidCreatedFailedConsumerTests : IClassFixture<ApiWebApplicationFact
 		(await consumerHarness.Consumed.Any<BidCreatedFailedMessage>()).Should().Be(true);
 
 		(await harness.Published.Any<BidCreatedFailedMessage>()).Should().Be(true);
+
+		try { await Task.Delay(5000, cancellationTokenSource.Token); }
+		catch { }
 
 		notification.Should().NotBeNull();
 		notification!.BidObjectId.Should().Be(message.BidObjectId);

@@ -9,6 +9,7 @@ using System.Text.Json;
 
 namespace OpenLane.ApiTests.Endpoints;
 
+[Collection("EnvironmenCollection")]
 public class PostEndpointTests : IClassFixture<ApiWebApplicationFactory>
 {
 	private readonly HttpClient _client;
@@ -29,7 +30,7 @@ public class PostEndpointTests : IClassFixture<ApiWebApplicationFactory>
 		var bidObjectId = Guid.NewGuid();
 		var bidPrice = 120m;
 		var requestUri = string.Format(PostBidEndpoint.InstanceFormat);
-		var bodyObject = new PostBidRequest(bidObjectId, ApiWebApplicationFactory.OpenOffer.ObjectId, bidPrice, Guid.NewGuid());
+		var bodyObject = new PostBidRequest(bidObjectId, _application.OpenOffer.ObjectId, bidPrice, Guid.NewGuid());
 		var bodyString = new StringContent(JsonSerializer.Serialize(bodyObject), Encoding.UTF8, "application/json");
 
 		_client.DefaultRequestHeaders.Add("Idempotency-Key", Guid.NewGuid().ToString());
@@ -56,7 +57,7 @@ public class PostEndpointTests : IClassFixture<ApiWebApplicationFactory>
 		var bidObjectId = Guid.NewGuid();
 		var bidPrice = 120m;
 		var requestUri = string.Format(PostBidEndpoint.InstanceFormat);
-		var bodyObject = new PostBidRequest(bidObjectId, ApiWebApplicationFactory.OpenOffer.ObjectId, bidPrice, Guid.NewGuid());
+		var bodyObject = new PostBidRequest(bidObjectId, _application.OpenOffer.ObjectId, bidPrice, Guid.NewGuid());
 		var bodyString = new StringContent(JsonSerializer.Serialize(bodyObject), Encoding.UTF8, "application/json");
 
 		_client.DefaultRequestHeaders.Add("Idempotency-Key", idempotency);

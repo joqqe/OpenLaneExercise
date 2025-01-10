@@ -9,6 +9,7 @@ using System.Text.Json;
 
 namespace OpenLane.ApiTests.Consumers;
 
+[Collection("EnvironmenCollection")]
 public class BidCreatedConsumerTests : IClassFixture<ApiWebApplicationFactory>
 {
 	private readonly ApiWebApplicationFactory _application;
@@ -37,15 +38,17 @@ public class BidCreatedConsumerTests : IClassFixture<ApiWebApplicationFactory>
 	{
 		var connection = await CreateHubConnectionAsync();
 		var harness = _application.Services.GetRequiredService<ITestHarness>();
+		var cancellationTokenSource = new CancellationTokenSource();
 
 		// Arrange
 		var message = new BidCreatedMessage(
-			Guid.NewGuid(), ApiWebApplicationFactory.OpenOffer.ObjectId, 120m, Guid.NewGuid());
+			Guid.NewGuid(), _application.OpenOffer.ObjectId, 120m, Guid.NewGuid());
 
 		BidCreatedNotification notification = default!; 
 		connection.On<BidCreatedNotification>("BidCreated", (message) =>
 		{
 			notification = message;
+			cancellationTokenSource.Cancel();
 		});
 
 		// Act
@@ -58,6 +61,9 @@ public class BidCreatedConsumerTests : IClassFixture<ApiWebApplicationFactory>
 		(await consumerHarness.Consumed.Any<BidCreatedMessage>()).Should().Be(true);
 
 		(await harness.Published.Any<BidCreatedMessage>()).Should().Be(true);
+
+		try { await Task.Delay(5000, cancellationTokenSource.Token); }
+		catch { }
 
 		notification.Should().NotBeNull();
 		notification!.BidObjectId.Should().Be(message.BidObjectId);

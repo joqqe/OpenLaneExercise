@@ -6,40 +6,28 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenLane.Domain;
 using OpenLane.Infrastructure;
-using Testcontainers.MsSql;
-using Testcontainers.RabbitMq;
 using MassTransit;
 using OpenLane.Api.Application.Bids.Consumers;
-using Testcontainers.Redis;
 
 namespace OpenLane.ApiTests;
 
+[Collection("EnvironmenCollection")]
 public class ApiWebApplicationFactory : WebApplicationFactory<Program>
 {
-	public static readonly Offer OpenOffer = TestDataFactory.CreateOpenOffer();
-	public static readonly Offer ClosedOffer = TestDataFactory.CreateClosedOffer();
-	public static readonly Offer FutureOffer = TestDataFactory.CreateFutureOffer();
-	public static readonly Bid Bid = TestDataFactory.CreateBid(OpenOffer);
-	private readonly MsSqlContainer _msSqlContainer;
-	private readonly RabbitMqContainer _rabbitMqContainer;
-	private readonly RedisContainer _redisContainer;
+	public readonly Offer OpenOffer;
+	public readonly Offer ClosedOffer;
+	public readonly Offer FutureOffer;
+	public readonly Bid Bid;
+	private readonly EnvironmentContainersFixture _environmentContainers;
 
-	public ApiWebApplicationFactory()
+	public ApiWebApplicationFactory(EnvironmentContainersFixture environmentContainers)
 	{
-		_msSqlContainer = new MsSqlBuilder().Build();
-		_rabbitMqContainer = new RabbitMqBuilder().Build();
-		_redisContainer = new RedisBuilder().Build();
+		_environmentContainers = environmentContainers;
 
-		Task.WhenAll([_msSqlContainer.StartAsync(), _rabbitMqContainer.StartAsync(), _redisContainer.StartAsync()])
-			.GetAwaiter().GetResult();
-	}
-
-	public override async ValueTask DisposeAsync()
-	{
-		await Task.WhenAll([_msSqlContainer.StopAsync(), _rabbitMqContainer.StopAsync(), _redisContainer.StopAsync()]);
-		await Task.WhenAll([_msSqlContainer.DisposeAsync().AsTask(), _rabbitMqContainer.DisposeAsync().AsTask(), _redisContainer.DisposeAsync().AsTask()]);
-
-		await base.DisposeAsync();
+		OpenOffer = TestDataFactory.CreateOpenOffer();
+		ClosedOffer = TestDataFactory.CreateClosedOffer();
+		FutureOffer = TestDataFactory.CreateFutureOffer();
+		Bid = TestDataFactory.CreateBid(OpenOffer);
 	}
 
 	protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -49,9 +37,9 @@ public class ApiWebApplicationFactory : WebApplicationFactory<Program>
 			var configuration = new ConfigurationBuilder()
 				.AddInMemoryCollection(new Dictionary<string, string?>
 				{
-					{ "ConnectionStrings:AppDB", _msSqlContainer.GetConnectionString() },
-					{ "ConnectionStrings:MessageQueue", _rabbitMqContainer.GetConnectionString() },
-					{ "ConnectionStrings:DistributedCache", _redisContainer.GetConnectionString() }
+					{ "ConnectionStrings:AppDB", _environmentContainers.MsSqlContainer.GetConnectionString() },
+					{ "ConnectionStrings:MessageQueue", _environmentContainers.RabbitMqContainer.GetConnectionString() },
+					{ "ConnectionStrings:DistributedCache", _environmentContainers.RedisContainer.GetConnectionString() }
 				})
 				.Build();
 

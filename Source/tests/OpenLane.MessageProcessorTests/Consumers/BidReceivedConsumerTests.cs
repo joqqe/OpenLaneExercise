@@ -8,6 +8,7 @@ using OpenLane.MessageProcessor.Consumers;
 
 namespace OpenLane.MessageProcessorTests.Consumers;
 
+[Collection("EnvironmenCollection")]
 public class BidReceivedConsumerTests : IClassFixture<MessageProcessorWebApplicationFactory>
 {
 	private readonly MessageProcessorWebApplicationFactory _application;
@@ -18,7 +19,7 @@ public class BidReceivedConsumerTests : IClassFixture<MessageProcessorWebApplica
 	}
 
 	[Fact]
-	public async Task BidReceivedConsumer_ShouldSave_Bid()
+	public async Task BidReceivedConsumer_Should_SaveBid_SendBidCreatedMessage()
 	{
 		var harness = _application.Services.GetRequiredService<ITestHarness>();
 		var serviceScopeFactory = _application.Services.GetRequiredService<IServiceScopeFactory>();
@@ -27,7 +28,7 @@ public class BidReceivedConsumerTests : IClassFixture<MessageProcessorWebApplica
 
 		// Arrange
 		var message = new BidReceivedMessage(
-			Guid.NewGuid(), Guid.NewGuid(), MessageProcessorWebApplicationFactory.OpenOffer.ObjectId, 120m, Guid.NewGuid());
+			Guid.NewGuid(), Guid.NewGuid(), _application.OpenOffer.ObjectId, 120m, Guid.NewGuid());
 
 		// Act
 		await harness.Bus.Publish(message);
@@ -50,14 +51,16 @@ public class BidReceivedConsumerTests : IClassFixture<MessageProcessorWebApplica
 		bid?.UserObjectId.Should().Be(message.UserObjectId);
 	}
 
-	[Theory]
-	[MemberData(nameof(GetBadMessageData))]
-	public async Task BidReceivedConsumer_ShouldNotSave_Bid(BidReceivedMessage message)
+	[Fact]
+	public async Task BidReceivedConsumer_ToLowePrice_Should_NotSaveBid_SendBidCreatedFailedMessage()
 	{
 		var harness = _application.Services.GetRequiredService<ITestHarness>();
 		var serviceScopeFactory = _application.Services.GetRequiredService<IServiceScopeFactory>();
 		using var scope = serviceScopeFactory.CreateScope();
 		var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+		// Arrange
+		var message = new BidReceivedMessage(Guid.NewGuid(), Guid.NewGuid(), _application.OpenOffer.ObjectId, _application.Bid.Price - 1, Guid.NewGuid());
 
 		// Act
 		await harness.Bus.Publish(message);
@@ -76,17 +79,115 @@ public class BidReceivedConsumerTests : IClassFixture<MessageProcessorWebApplica
 		bid.Should().BeNull();
 	}
 
-	public static IEnumerable<object[]> GetBadMessageData()
+	[Fact]
+	public async Task BidReceivedConsumer_InvalidIdempotencyKey_Should_NotSaveBid_SendBidCreatedFailedMessage()
 	{
-		yield return new object[] { new BidReceivedMessage(
-			Guid.Empty, Guid.NewGuid(), Guid.NewGuid(), 120m, Guid.NewGuid()) };
-		yield return new object[] { new BidReceivedMessage(
-			Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), 120m, Guid.NewGuid()) };
-		yield return new object[] { new BidReceivedMessage(
-			Guid.NewGuid(), Guid.NewGuid(), MessageProcessorWebApplicationFactory.ClosedOffer.ObjectId, 120m, Guid.NewGuid()) };
-		yield return new object[] { new BidReceivedMessage(
-			Guid.NewGuid(), Guid.NewGuid(), MessageProcessorWebApplicationFactory.FutureOffer.ObjectId, 120m, Guid.NewGuid()) };
-		yield return new object[] { new BidReceivedMessage(
-			Guid.NewGuid(), Guid.NewGuid(), MessageProcessorWebApplicationFactory.OpenOffer.ObjectId, 50m, Guid.NewGuid()) };
+		var harness = _application.Services.GetRequiredService<ITestHarness>();
+		var serviceScopeFactory = _application.Services.GetRequiredService<IServiceScopeFactory>();
+		using var scope = serviceScopeFactory.CreateScope();
+		var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+		// Arrange
+		var message = new BidReceivedMessage(Guid.Empty, Guid.NewGuid(), _application.OpenOffer.ObjectId, 120m, Guid.NewGuid());
+
+		// Act
+		await harness.Bus.Publish(message);
+
+		// Assert
+		(await harness.Published.Any<BidReceivedMessage>()).Should().Be(true);
+		(await harness.Consumed.Any<BidReceivedMessage>()).Should().Be(true);
+		var consumerHarness = harness.GetConsumerHarness<BidReceivedConsumer>();
+		(await consumerHarness.Consumed.Any<BidReceivedMessage>()).Should().Be(true);
+
+		(await harness.Published.Any<BidCreatedFailedMessage>()).Should().Be(true);
+
+		var bid = await appDbContext.Bids
+			.Include(x => x.Offer)
+			.SingleOrDefaultAsync(x => x.ObjectId == message.BidObjectId);
+		bid.Should().BeNull();
+	}
+
+	[Fact]
+	public async Task BidReceivedConsumer_UnknownOffer_Should_NotSaveBid_SendBidCreatedFailedMessage()
+	{
+		var harness = _application.Services.GetRequiredService<ITestHarness>();
+		var serviceScopeFactory = _application.Services.GetRequiredService<IServiceScopeFactory>();
+		using var scope = serviceScopeFactory.CreateScope();
+		var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+		// Arrange
+		var message = new BidReceivedMessage(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), 120m, Guid.NewGuid());
+
+		// Act
+		await harness.Bus.Publish(message);
+
+		// Assert
+		(await harness.Published.Any<BidReceivedMessage>()).Should().Be(true);
+		(await harness.Consumed.Any<BidReceivedMessage>()).Should().Be(true);
+		var consumerHarness = harness.GetConsumerHarness<BidReceivedConsumer>();
+		(await consumerHarness.Consumed.Any<BidReceivedMessage>()).Should().Be(true);
+
+		(await harness.Published.Any<BidCreatedFailedMessage>()).Should().Be(true);
+
+		var bid = await appDbContext.Bids
+			.Include(x => x.Offer)
+			.SingleOrDefaultAsync(x => x.ObjectId == message.BidObjectId);
+		bid.Should().BeNull();
+	}
+
+	[Fact]
+	public async Task BidReceivedConsumer_ClosedOffer_Should_NotSaveBid_SendBidCreatedFailedMessage()
+	{
+		var harness = _application.Services.GetRequiredService<ITestHarness>();
+		var serviceScopeFactory = _application.Services.GetRequiredService<IServiceScopeFactory>();
+		using var scope = serviceScopeFactory.CreateScope();
+		var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+		// Arrange
+		var message = new BidReceivedMessage(Guid.NewGuid(), Guid.NewGuid(), _application.ClosedOffer.ObjectId, 120m, Guid.NewGuid());
+
+		// Act
+		await harness.Bus.Publish(message);
+
+		// Assert
+		(await harness.Published.Any<BidReceivedMessage>()).Should().Be(true);
+		(await harness.Consumed.Any<BidReceivedMessage>()).Should().Be(true);
+		var consumerHarness = harness.GetConsumerHarness<BidReceivedConsumer>();
+		(await consumerHarness.Consumed.Any<BidReceivedMessage>()).Should().Be(true);
+
+		(await harness.Published.Any<BidCreatedFailedMessage>()).Should().Be(true);
+
+		var bid = await appDbContext.Bids
+			.Include(x => x.Offer)
+			.SingleOrDefaultAsync(x => x.ObjectId == message.BidObjectId);
+		bid.Should().BeNull();
+	}
+
+	[Fact]
+	public async Task BidReceivedConsumer_FutureOffer_Should_NotSaveBid_SendBidCreatedFailedMessage()
+	{
+		var harness = _application.Services.GetRequiredService<ITestHarness>();
+		var serviceScopeFactory = _application.Services.GetRequiredService<IServiceScopeFactory>();
+		using var scope = serviceScopeFactory.CreateScope();
+		var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+		// Arrange
+		var message = new BidReceivedMessage(Guid.NewGuid(), Guid.NewGuid(), _application.FutureOffer.ObjectId, 120m, Guid.NewGuid());
+
+		// Act
+		await harness.Bus.Publish(message);
+
+		// Assert
+		(await harness.Published.Any<BidReceivedMessage>()).Should().Be(true);
+		(await harness.Consumed.Any<BidReceivedMessage>()).Should().Be(true);
+		var consumerHarness = harness.GetConsumerHarness<BidReceivedConsumer>();
+		(await consumerHarness.Consumed.Any<BidReceivedMessage>()).Should().Be(true);
+
+		(await harness.Published.Any<BidCreatedFailedMessage>()).Should().Be(true);
+
+		var bid = await appDbContext.Bids
+			.Include(x => x.Offer)
+			.SingleOrDefaultAsync(x => x.ObjectId == message.BidObjectId);
+		bid.Should().BeNull();
 	}
 }
