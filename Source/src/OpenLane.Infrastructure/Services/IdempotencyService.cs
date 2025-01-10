@@ -9,6 +9,8 @@ public class IdempotencyService : IIdempotencyService
 
 	public IdempotencyService(IDistributedCache cache)
 	{
+		ArgumentNullException.ThrowIfNull(cache);
+
 		_cache = cache;
 	}
 
