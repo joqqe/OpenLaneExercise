@@ -12,15 +12,15 @@ public class IdempotencyService : IIdempotencyService
 		_cache = cache;
 	}
 
-	public async Task<bool> IsRequestProcessedAsync(string key)
+	public async Task<bool> IsRequestProcessedAsync(string key, string transaction)
 	{
-		var value = await _cache.GetStringAsync(key);
+		var value = await _cache.GetStringAsync($"{key}--{transaction}");
 		return value != null;
 	}
 
-	public async Task MarkRequestAsProcessedAsync(string key)
+	public async Task MarkRequestAsProcessedAsync(string key, string transaction)
 	{
-		await _cache.SetStringAsync(key, "processed", new DistributedCacheEntryOptions
+		await _cache.SetStringAsync($"{key}--{transaction}", "processed", new DistributedCacheEntryOptions
 		{
 			AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(4)
 		});

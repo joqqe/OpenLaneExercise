@@ -14,6 +14,9 @@ public class BidCreatedFailedConsumer : IConsumer<BidCreatedFailedMessage>
 
 	public BidCreatedFailedConsumer(ILogger<BidCreatedFailedConsumer> logger, IHubContext<NotificationHub> hub)
 	{
+		ArgumentNullException.ThrowIfNull(logger);
+		ArgumentNullException.ThrowIfNull(hub);
+
 		_logger = logger;
 		_hub = hub;
 	}

@@ -2,6 +2,6 @@
 
 public interface IIdempotencyService
 {
-	Task<bool> IsRequestProcessedAsync(string key);
-	Task MarkRequestAsProcessedAsync(string key);
+	Task<bool> IsRequestProcessedAsync(string key, string transaction);
+	Task MarkRequestAsProcessedAsync(string key, string transaction);
 }

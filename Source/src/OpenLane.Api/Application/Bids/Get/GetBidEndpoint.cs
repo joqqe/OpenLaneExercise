@@ -22,8 +22,10 @@ public static class GetBidEndpoint
 			CancellationToken cancellationToken,
 			Guid objectId) =>
 		{
+			ArgumentNullException.ThrowIfNull(logger);
 			ArgumentNullException.ThrowIfNull(validator);
 			ArgumentNullException.ThrowIfNull(handler);
+
 			var request = new GetBidHandleRequest(objectId);
 
 			var problemDetails = await validator.GetProblemDetailsAsync(request, Instance, cancellationToken);

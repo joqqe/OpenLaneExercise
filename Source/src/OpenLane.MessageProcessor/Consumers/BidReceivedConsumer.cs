@@ -21,6 +21,8 @@ public class BidReceivedConsumer : IConsumer<BidReceivedMessage>
 	{
 		ArgumentNullException.ThrowIfNull(logger);
 		ArgumentNullException.ThrowIfNull(handler);
+		ArgumentNullException.ThrowIfNull(bus);
+		ArgumentNullException.ThrowIfNull(idempotencyService);
 
 		_logger = logger;
 		_handler = handler;
@@ -35,6 +37,14 @@ public class BidReceivedConsumer : IConsumer<BidReceivedMessage>
 
 		_logger.LogInformation("{Consumer}: {Message}", nameof(BidReceivedConsumer), JsonSerializer.Serialize(context.Message));
 
+		if (await _idempotencyService.IsRequestProcessedAsync(context.Message.IdempotencyKey.ToString(), "CreateBid"))
+		{
+			var createdFailedMessage = new BidCreatedFailedMessage(context.Message.BidObjectId, string.Format("Duplicate message: {0}.", context.Message.IdempotencyKey));
+			await _bus.Publish(createdFailedMessage);
+
+			_logger.LogWarning("Failed to consume {Consumer}: {Message}", nameof(BidReceivedConsumer), JsonSerializer.Serialize(context.Message));
+		}
+
 		var request = new CreateBidRequest(context.Message.BidObjectId, context.Message.OfferObjectId, context.Message.Price, context.Message.UserObjectId);
 		var result = await _handler.InvokeAsync(request);
 
@@ -47,10 +57,10 @@ public class BidReceivedConsumer : IConsumer<BidReceivedMessage>
 			return;
 		}
 
-		var createdMessage = new BidCreatedMessage(result.Value!.ObjectId, result.Value.Offer.ObjectId, result.Value.Price, result.Value.UserObjectId);
+		var createdMessage = new BidCreatedMessage(context.Message.IdempotencyKey, result.Value!.ObjectId, result.Value.Offer.ObjectId, result.Value.Price, result.Value.UserObjectId);
 		await _bus.Publish(createdMessage);
 
-		await _idempotencyService.MarkRequestAsProcessedAsync(context.Message.IdempotencyKey.ToString());
+		await _idempotencyService.MarkRequestAsProcessedAsync(context.Message.IdempotencyKey.ToString(), "CreateBid");
 
 		_logger.LogInformation("Successfuly consumed {Consumer}: {Message}", nameof(BidReceivedConsumer), JsonSerializer.Serialize(context.Message));
 	}

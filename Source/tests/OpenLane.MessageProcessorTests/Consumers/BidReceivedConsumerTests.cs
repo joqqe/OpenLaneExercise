@@ -190,4 +190,39 @@ public class BidReceivedConsumerTests : IClassFixture<MessageProcessorWebApplica
 			.SingleOrDefaultAsync(x => x.ObjectId == message.BidObjectId);
 		bid.Should().BeNull();
 	}
+
+	[Fact]
+	public async Task BidReceivedConsumer_DoubleIdempotencyKey_Should_SaveBid_SendBidCreatedMessage()
+	{
+		var harness = _application.Services.GetRequiredService<ITestHarness>();
+		var serviceScopeFactory = _application.Services.GetRequiredService<IServiceScopeFactory>();
+		using var scope = serviceScopeFactory.CreateScope();
+		var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+		// Arrange
+		var idempotencyKey = Guid.NewGuid();
+		var message = new BidReceivedMessage(idempotencyKey , Guid.NewGuid(), _application.OpenOffer.ObjectId, 120m, Guid.NewGuid());
+
+		// Act first message
+		await harness.Bus.Publish(message);
+
+		// Assert
+		(await harness.Published.Any<BidReceivedMessage>()).Should().Be(true);
+		(await harness.Consumed.Any<BidReceivedMessage>()).Should().Be(true);
+		var consumerHarness = harness.GetConsumerHarness<BidReceivedConsumer>();
+		(await consumerHarness.Consumed.Any<BidReceivedMessage>()).Should().Be(true);
+
+		(await harness.Published.Any<BidCreatedMessage>()).Should().Be(true);
+
+		// Act second message
+		await harness.Bus.Publish(message);
+
+		// Assert second message
+		(await harness.Published.Any<BidReceivedMessage>()).Should().Be(true);
+		(await harness.Consumed.Any<BidReceivedMessage>()).Should().Be(true);
+		var consumerHarness2 = harness.GetConsumerHarness<BidReceivedConsumer>();
+		(await consumerHarness.Consumed.Any<BidReceivedMessage>()).Should().Be(true);
+
+		(await harness.Published.Any<BidCreatedFailedMessage>()).Should().Be(true);
+	}
 }

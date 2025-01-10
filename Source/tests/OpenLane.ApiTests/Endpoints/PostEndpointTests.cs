@@ -44,12 +44,34 @@ public class PostEndpointTests : IClassFixture<ApiWebApplicationFactory>
 
 		(await harness.Published.Any<Domain.Messages.BidReceivedMessage>()).Should().Be(true);
 	}
+	
+	[Theory]
+	[MemberData(nameof(GetBadRequestData))]
+	public async Task PostBids_ShouldReturn_400BadRequest(PostBidRequest bodyObject)
+	{
+		var harness = _application.Services.GetRequiredService<ITestHarness>();
+
+		var requestUri = string.Format(PostBidEndpoint.InstanceFormat);
+		var bodyString = new StringContent(JsonSerializer.Serialize(bodyObject), Encoding.UTF8, "application/json");
+		_client.DefaultRequestHeaders.Add("Idempotency-Key", Guid.NewGuid().ToString());
+
+		var response = await _client.PostAsync(requestUri, bodyString);
+
+		response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+	}
+	public static IEnumerable<object[]> GetBadRequestData()
+	{
+		yield return new object[] { new PostBidRequest(Guid.Empty, Guid.NewGuid(), 120m, Guid.NewGuid()) };
+		yield return new object[] { new PostBidRequest(Guid.NewGuid(), Guid.Empty, 120m, Guid.NewGuid()) };
+		yield return new object[] { new PostBidRequest(Guid.NewGuid(), Guid.NewGuid(), 0, Guid.NewGuid()) };
+		yield return new object[] { new PostBidRequest(Guid.NewGuid(), Guid.NewGuid(), 120m, Guid.Empty) };
+	}
 
 	[Theory]
 	[InlineData(null)]
 	[InlineData("")]
 	[InlineData("123")]
-	public async Task PostBids_Invalid_IdempotencyKey_ShouldFail(string idempotency)
+	public async Task PostBids_Invalid_IdempotencyKey_ShouldFail(string? idempotency)
 	{
 		var harness = _application.Services.GetRequiredService<ITestHarness>();
 
@@ -68,28 +90,33 @@ public class PostEndpointTests : IClassFixture<ApiWebApplicationFactory>
 		// Assert
 		postResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 	}
-	
-	[Theory]
-	[MemberData(nameof(GetBadRequestData))]
-	public async Task PostBids_ShouldReturn_400BadRequest(PostBidRequest bodyObject)
+
+	[Fact]
+	public async Task PostBids_DoubleIdempotencyKey_ShouldReturn_400BadRequest()
 	{
 		var harness = _application.Services.GetRequiredService<ITestHarness>();
 
+		// Arrange
+		var idempotencyKey = Guid.NewGuid().ToString();
+		var bidObjectId = Guid.NewGuid();
+		var bidPrice = 120m;
 		var requestUri = string.Format(PostBidEndpoint.InstanceFormat);
+		var bodyObject = new PostBidRequest(bidObjectId, _application.OpenOffer.ObjectId, bidPrice, Guid.NewGuid());
 		var bodyString = new StringContent(JsonSerializer.Serialize(bodyObject), Encoding.UTF8, "application/json");
-		_client.DefaultRequestHeaders.Add("Idempotency-Key", Guid.NewGuid().ToString());
 
-		var response = await _client.PostAsync(requestUri, bodyString);
+		_client.DefaultRequestHeaders.Add("Idempotency-Key", idempotencyKey);
 
-		response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+		// Act first call
+		var postResponse = await _client.PostAsync(requestUri, bodyString);
 
-		(await harness.Published.Any<Domain.Messages.BidReceivedMessage>()).Should().Be(false);
-	}
-	public static IEnumerable<object[]> GetBadRequestData()
-	{
-		yield return new object[] { new PostBidRequest(Guid.Empty, Guid.NewGuid(), 120m, Guid.NewGuid()) };
-		yield return new object[] { new PostBidRequest(Guid.NewGuid(), Guid.Empty, 120m, Guid.NewGuid()) };
-		yield return new object[] { new PostBidRequest(Guid.NewGuid(), Guid.NewGuid(), 0, Guid.NewGuid()) };
-		yield return new object[] { new PostBidRequest(Guid.NewGuid(), Guid.NewGuid(), 120m, Guid.Empty) };
+		// Assert first call
+		postResponse.StatusCode.Should().Be(HttpStatusCode.Accepted);
+		(await harness.Published.Any<Domain.Messages.BidReceivedMessage>()).Should().Be(true);
+
+		// Act second call
+		var postResponse2 = await _client.PostAsync(requestUri, bodyString);
+
+		// Assert second call
+		postResponse2.StatusCode.Should().Be(HttpStatusCode.Conflict);
 	}
 }

@@ -5,26 +5,18 @@ using Microsoft.Extensions.DependencyInjection;
 using OpenLane.Api.Application.Bids.Consumers;
 using OpenLane.Domain.Messages;
 using OpenLane.Domain.Notifications;
-using System.Text.Json;
 
 namespace OpenLane.ApiTests.Consumers;
 
 [Collection("EnvironmenCollection")]
-public class BidCreatedConsumerTests : IClassFixture<ApiWebApplicationFactory>
+public class BidCreatedConsumerTests(ApiWebApplicationFactory application) : IClassFixture<ApiWebApplicationFactory>
 {
-	private readonly ApiWebApplicationFactory _application;
-
-	public BidCreatedConsumerTests(ApiWebApplicationFactory application)
-	{
-		_application = application;
-	}
-
 	private async Task<HubConnection> CreateHubConnectionAsync()
 	{
 		var connection = new HubConnectionBuilder()
 			.WithUrl("http://127.0.0.1/api/notification", options =>
 			{
-				options.HttpMessageHandlerFactory = _ => _application.Server.CreateHandler();
+				options.HttpMessageHandlerFactory = _ => application.Server.CreateHandler();
 			})
 			.Build();
 
@@ -37,12 +29,12 @@ public class BidCreatedConsumerTests : IClassFixture<ApiWebApplicationFactory>
 	public async Task BidCreatedConsumer_ShouldSave_Bid()
 	{
 		var connection = await CreateHubConnectionAsync();
-		var harness = _application.Services.GetRequiredService<ITestHarness>();
+		var harness = application.Services.GetRequiredService<ITestHarness>();
 		var cancellationTokenSource = new CancellationTokenSource();
 
 		// Arrange
 		var message = new BidCreatedMessage(
-			Guid.NewGuid(), _application.OpenOffer.ObjectId, 120m, Guid.NewGuid());
+			Guid.NewGuid(),  Guid.NewGuid(), application.OpenOffer.ObjectId, 120m, Guid.NewGuid());
 
 		BidCreatedNotification notification = default!; 
 		connection.On<BidCreatedNotification>("BidCreated", (message) =>

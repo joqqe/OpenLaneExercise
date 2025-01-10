@@ -32,14 +32,27 @@ public static class PostBidEndpoint
 			ArgumentNullException.ThrowIfNull(validator);
 			ArgumentNullException.ThrowIfNull(handler);
 			ArgumentNullException.ThrowIfNull(bus);
+			ArgumentNullException.ThrowIfNull(idempotencyService);
 
 			if (!httpRequest.Headers.TryGetValue("Idempotency-Key", out var idempotencyKey))
-				return Results.BadRequest("Idempotency-Key header is missing.");
+			{
+				var errorMessage = "Idempotency-Key header is missing.";
+				logger.LogWarning(errorMessage);
+				return Results.BadRequest(errorMessage);
+			}
 			if (string.IsNullOrWhiteSpace(idempotencyKey)
 				|| !Guid.TryParse(idempotencyKey, out var idempotencyKeyGuid))
-				return Results.BadRequest("Invalid Idempotency-Key header.");
-			if (await idempotencyService.IsRequestProcessedAsync(idempotencyKey!))
-				return Results.Conflict("Duplicate request");
+			{
+				var errorMessage = "Invalid Idempotency-Key header.";
+				logger.LogWarning(errorMessage);
+				return Results.BadRequest(errorMessage);
+			}
+			if (await idempotencyService.IsRequestProcessedAsync(idempotencyKey!, "ReceivedBid"))
+			{
+				var errorMessage = string.Format("Duplicate request: {0}.", idempotencyKey!);
+				logger.LogWarning(errorMessage);
+				return Results.Conflict(errorMessage);
+			}
 
 			var problemDetails = await validator.GetProblemDetailsAsync(request, Instance, cancellationToken);
 			if (problemDetails is not null)
@@ -50,6 +63,8 @@ public static class PostBidEndpoint
 
 			var postBidRequest = new PostBidHandleRequest(idempotencyKeyGuid, request.BidObjectId, request.OfferObjectId, request.Price, request.UserObjectId);
 			await handler.InvokeAsync(postBidRequest, cancellationToken);
+
+			await idempotencyService.MarkRequestAsProcessedAsync(idempotencyKey!, "ReceivedBid");
 
 			logger.LogInformation("Successfuly send bid accepted.");
 
