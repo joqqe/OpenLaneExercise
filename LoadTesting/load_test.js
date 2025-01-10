@@ -23,8 +23,8 @@ export default function () {
         'https://localhost:7043/Api/Bid',
         JSON.stringify(body), 
         {
-        headers: { 'Content-Type': 'application/json' }
-      });
+            headers: { 'Content-Type': 'application/json', 'Idempotency-Key': uuidv4() }
+        });
 
     check(res, {
         'status is 202': (r) => r.status === 202,
