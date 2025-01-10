@@ -70,7 +70,6 @@ docker run -d -p 6379:6379 --name redis  redis
 
 ## Todos
 - Add more IdempotencyKey tests
-- Fix duplicate testcontairs unit-tests
 - Add missing endpoints
     - Update load-test when missing endpoints are implemented, so Prepare-Database.sql can be removed
 - Adding security
