@@ -65,7 +65,7 @@ public class BidCreatedFailedConsumerTests : IClassFixture<ApiWebApplicationFact
 
 		(await harness.Published.Any<BidCreatedFailedMessage>()).Should().Be(true);
 
-		try { await Task.Delay(5000, cancellationTokenSource.Token); }
+		try { await Task.Delay(3000, cancellationTokenSource.Token); }
 		catch { }
 
 		notification.Should().NotBeNull();
