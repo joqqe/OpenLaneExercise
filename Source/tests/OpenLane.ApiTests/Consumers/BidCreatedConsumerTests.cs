@@ -120,7 +120,7 @@ public class BidCreatedConsumerTests : IClassFixture<ApiWebApplicationFactory>
 		(await harness.Published.Any<BidCreatedMessage>()).Should().Be(true);
 		(await harness.Consumed.Any<BidCreatedMessage>()).Should().Be(true);
 		var consumerHarness2 = harness.GetConsumerHarness<BidCreatedConsumer>();
-		(await consumerHarness.Consumed.Any<BidCreatedMessage>()).Should().Be(true);
+		(await consumerHarness2.Consumed.Any<BidCreatedMessage>()).Should().Be(true);
 
 		(await harness.Published.Any<BidCreatedMessage>()).Should().Be(true);
 

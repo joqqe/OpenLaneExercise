@@ -31,16 +31,16 @@ public class BidCreatedConsumer : IConsumer<BidCreatedMessage>
 	{
 		_logger.LogInformation("{Consumer}: {Message}", nameof(BidCreatedConsumer), JsonSerializer.Serialize(context.Message));
 
-		if (await _idempotencyService.IsRequestProcessedAsync(context.Message.IdempontencyKey.ToString(), "BidCreatedNotification"))
+		if (await _idempotencyService.IsRequestProcessedAsync(context.Message.IdempotencyKey.ToString(), "BidCreatedNotification"))
 		{
-			_logger.LogWarning("Duplicate message: {IdempontencyKey}.", context.Message.IdempontencyKey);
+			_logger.LogWarning("Duplicate message: {IdempontencyKey}.", context.Message.IdempotencyKey);
 			return;
 		}
 
 		var notification = new BidCreatedNotification(context.Message.BidObjectId, context.Message.OfferObjectId, context.Message.Price, context.Message.UserObjectId);
 		await _hub.Clients.All.SendAsync("BidCreated", notification);
 
-		await _idempotencyService.MarkRequestAsProcessedAsync(context.Message.IdempontencyKey.ToString(), "BidCreatedNotification");
+		await _idempotencyService.MarkRequestAsProcessedAsync(context.Message.IdempotencyKey.ToString(), "BidCreatedNotification");
 
 		_logger.LogInformation("Successfuly consumed {Consumer}: {Message}", nameof(BidCreatedConsumer), JsonSerializer.Serialize(context.Message));
 	}

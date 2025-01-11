@@ -5,11 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using OpenLane.Api.Application.Bids.Consumers;
 using OpenLane.Domain.Messages;
 using OpenLane.Domain.Notifications;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OpenLane.ApiTests.Consumers;
 
@@ -37,7 +32,7 @@ public class BidCreatedFailedConsumerTests : IClassFixture<ApiWebApplicationFact
 	}
 
 	[Fact]
-	public async Task BidCreatedFailedConsumer_ShouldSave_Bid()
+	public async Task BidCreatedFailedConsumer_Should_SendNotification()
 	{
 		var connection = await CreateHubConnectionAsync();
 		var harness = _application.Services.GetRequiredService<ITestHarness>();
@@ -45,7 +40,7 @@ public class BidCreatedFailedConsumerTests : IClassFixture<ApiWebApplicationFact
 
 		// Arrange
 		var message = new BidCreatedFailedMessage(
-			Guid.NewGuid(), "Failed to create bid.");
+			Guid.NewGuid(), Guid.NewGuid(), "Failed to create bid.");
 
 		BidCreatedFailedNotification notification = default!;
 		connection.On<BidCreatedFailedNotification>("BidCreatedFailed", (message) =>
@@ -71,5 +66,62 @@ public class BidCreatedFailedConsumerTests : IClassFixture<ApiWebApplicationFact
 		notification.Should().NotBeNull();
 		notification!.BidObjectId.Should().Be(message.BidObjectId);
 		notification.ErrorMessage.Should().Be(message.ErrorMessage);
+	}
+
+	[Fact]
+	public async Task BidCreatedFailedConsumer_DoubleIdempotencyKey_NotSendNotification()
+	{
+		var connection = await CreateHubConnectionAsync();
+		var harness = _application.Services.GetRequiredService<ITestHarness>();
+		var cancellationTokenSource = new CancellationTokenSource();
+
+		// Arrange
+		var message = new BidCreatedFailedMessage(
+			Guid.NewGuid(), Guid.NewGuid(), "Failed to create bid.");
+
+		BidCreatedFailedNotification notification = default!;
+		connection.On<BidCreatedFailedNotification>("BidCreatedFailed", (message) =>
+		{
+			notification = message;
+			cancellationTokenSource.Cancel();
+		});
+
+		// Act first publish
+		await harness.Bus.Publish(message);
+
+		// Assert first publish
+		(await harness.Published.Any<BidCreatedFailedMessage>()).Should().Be(true);
+		(await harness.Consumed.Any<BidCreatedFailedMessage>()).Should().Be(true);
+		var consumerHarness = harness.GetConsumerHarness<BidCreatedFailedConsumer>();
+		(await consumerHarness.Consumed.Any<BidCreatedFailedMessage>()).Should().Be(true);
+
+		(await harness.Published.Any<BidCreatedFailedMessage>()).Should().Be(true);
+
+		try { await Task.Delay(3000, cancellationTokenSource.Token); }
+		catch { }
+
+		notification.Should().NotBeNull();
+		notification!.BidObjectId.Should().Be(message.BidObjectId);
+		notification.ErrorMessage.Should().Be(message.ErrorMessage);
+
+		// Arrange second publish
+		notification = default!;
+		cancellationTokenSource = new CancellationTokenSource();
+
+		// Act second publish
+		await harness.Bus.Publish(message);
+
+		// Assert second publish
+		(await harness.Published.Any<BidCreatedFailedMessage>()).Should().Be(true);
+		(await harness.Consumed.Any<BidCreatedFailedMessage>()).Should().Be(true);
+		var consumerHarness2 = harness.GetConsumerHarness<BidCreatedFailedConsumer>();
+		(await consumerHarness2.Consumed.Any<BidCreatedFailedMessage>()).Should().Be(true);
+
+		(await harness.Published.Any<BidCreatedFailedMessage>()).Should().Be(true);
+
+		try { await Task.Delay(3000, cancellationTokenSource.Token); }
+		catch { }
+
+		notification.Should().BeNull();
 	}
 }
