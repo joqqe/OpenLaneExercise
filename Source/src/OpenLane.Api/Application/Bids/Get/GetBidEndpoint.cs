@@ -1,10 +1,7 @@
 ﻿using FluentValidation;
-using OpenLane.Common.Interfaces;
 using OpenLane.Api.Common.Factories;
 using OpenLane.Api.Application.Dtos;
-using OpenLane.Common;
 using Microsoft.AspNetCore.Mvc;
-using OpenLane.Domain;
 
 namespace OpenLane.Api.Application.Bids.Get;
 
@@ -17,8 +14,8 @@ public static class GetBidEndpoint
 	{
 		app.MapGet(Instance, async (
 			[FromServices] ILogger<Program> logger,
-			[FromServices] IValidator<GetBidHandleRequest> validator,
-			[FromServices] IHandler<GetBidHandleRequest, Result<Bid?>> handler,
+			[FromServices] IValidator<GetBidQuery> validator,
+			[FromServices] GetBidHandler handler,
 			CancellationToken cancellationToken,
 			Guid objectId) =>
 		{
@@ -26,7 +23,7 @@ public static class GetBidEndpoint
 			ArgumentNullException.ThrowIfNull(validator);
 			ArgumentNullException.ThrowIfNull(handler);
 
-			var request = new GetBidHandleRequest(objectId);
+			var request = new GetBidQuery(objectId);
 
 			var problemDetails = await validator.GetProblemDetailsAsync(request, Instance, cancellationToken);
 			if (problemDetails is not null)
@@ -36,13 +33,13 @@ public static class GetBidEndpoint
 			}
 
 			var response = await handler.InvokeAsync(request, cancellationToken);
-			if (response.IsFailure)
-				return Results.Problem(response.Error, Instance, StatusCodes.Status400BadRequest, "A functional exception has occured.");
+			if (response.Result.IsFailure)
+				return Results.Problem(response.Result.Error, Instance, StatusCodes.Status400BadRequest, "A functional exception has occured.");
 
-			if (response.Value is null)
+			if (response.Result.Value is null)
 				return Results.NotFound();
 
-			var dto = new BidDto(response.Value.ObjectId, response.Value.Price, response.Value.Offer.ObjectId);
+			var dto = new BidDto(response.Result.Value.ObjectId, response.Result.Value.Price, response.Result.Value.Offer.ObjectId);
 			logger.LogInformation("Successfuly send bid dto.");
 			return Results.Ok(dto);
 		})

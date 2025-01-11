@@ -3,8 +3,6 @@ using OpenLane.Api.Application.Bids.Get;
 using OpenLane.Api.Common.Factories;
 using Microsoft.AspNetCore.Mvc;
 using MassTransit;
-using OpenLane.Common;
-using OpenLane.Common.Interfaces;
 using OpenLane.Domain.Services;
 
 namespace OpenLane.Api.Application.Bids.Post;
@@ -23,7 +21,7 @@ public static class PostBidEndpoint
 			[FromHeader(Name = "Idempotency-Key")] Guid idempotencyKey,
 			[FromServices] ILogger<Program> logger,
 			[FromServices] IValidator<PostBidRequest> validator,
-			[FromServices] IHandler<PostBidHandleRequest, Result> handler,
+			[FromServices] PostBidHandler handler,
 			[FromServices] IBus bus,
 			[FromServices] IIdempotencyService idempotencyService,
 			CancellationToken cancellationToken,
@@ -50,7 +48,7 @@ public static class PostBidEndpoint
 				return Results.Problem(problemDetails);
 			}
 
-			var postBidRequest = new PostBidHandleRequest(idempotencyKey, request.BidObjectId, request.OfferObjectId, request.Price, request.UserObjectId);
+			var postBidRequest = new PostBidCommand(idempotencyKey, request.BidObjectId, request.OfferObjectId, request.Price, request.UserObjectId);
 			await handler.InvokeAsync(postBidRequest, cancellationToken);
 
 			await idempotencyService.MarkRequestAsProcessedAsync(idempotencyKey!.ToString(), IdempotencyTransaction);

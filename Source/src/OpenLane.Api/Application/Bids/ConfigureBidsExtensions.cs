@@ -1,8 +1,6 @@
 ﻿using OpenLane.Api.Application.Bids.Get;
 using OpenLane.Api.Application.Bids.Post;
-using OpenLane.Common;
-using OpenLane.Common.Interfaces;
-using OpenLane.Domain;
+using OpenLane.Common.Helpers;
 
 namespace OpenLane.Api.Application.Bids;
 
@@ -10,8 +8,7 @@ public static class ConfigureBidsExtensions
 {
 	public static IServiceCollection AddBids(this IServiceCollection services)
 	{
-		services.AddScoped<IHandler<GetBidHandleRequest, Result<Bid?>>, GetBidHandler>();
-		services.AddScoped<IHandler<PostBidHandleRequest, Result>, PostBidHandler>();
+		services.AddHandlers(typeof(ConfigureBidsExtensions));
 
 		return services;
 	}

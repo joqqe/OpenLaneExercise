@@ -6,9 +6,11 @@ using OpenLane.Infrastructure;
 
 namespace OpenLane.Api.Application.Bids.Get;
 
-public record GetBidHandleRequest(Guid ObjectId);
+public record GetBidQuery(Guid ObjectId);
 
-public class GetBidHandler : IHandler<GetBidHandleRequest, Result<Bid?>>
+public record GetBidResponse(Result<Bid?> Result);
+
+public class GetBidHandler : IHandler<GetBidQuery, GetBidResponse>
 {
 	private readonly ILogger<GetBidHandler> _logger;
 	private readonly AppDbContext _appContext;
@@ -22,7 +24,7 @@ public class GetBidHandler : IHandler<GetBidHandleRequest, Result<Bid?>>
 		_appContext = appContext;
 	}
 
-	public async Task<Result<Bid?>> InvokeAsync(GetBidHandleRequest request, CancellationToken cancellationToken = default)
+	public async Task<GetBidResponse> InvokeAsync(GetBidQuery request, CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(request);
 
@@ -34,11 +36,11 @@ public class GetBidHandler : IHandler<GetBidHandleRequest, Result<Bid?>>
 		if (entity is null)
 		{
 			_logger.LogWarning("Bid with ObjectId:{ObjectId} not found", request.ObjectId);
-			return Result<Bid?>.Success(default);
+			return new GetBidResponse(Result<Bid?>.Success(default));
 		}
 
 		_logger.LogInformation("Successfuly retrieved bid entity: {Entity}", entity);
 
-		return Result<Bid?>.Success(entity);
+		return new GetBidResponse(Result<Bid?>.Success(entity));
 	}
 }

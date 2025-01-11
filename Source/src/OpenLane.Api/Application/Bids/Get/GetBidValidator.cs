@@ -2,7 +2,7 @@
 
 namespace OpenLane.Api.Application.Bids.Get;
 
-public class GetBidValidator : AbstractValidator<GetBidHandleRequest>
+public class GetBidValidator : AbstractValidator<GetBidQuery>
 {
 	public GetBidValidator()
 	{

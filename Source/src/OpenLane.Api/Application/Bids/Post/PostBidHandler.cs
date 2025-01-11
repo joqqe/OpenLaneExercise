@@ -6,10 +6,12 @@ using OpenLane.Domain.Messages;
 
 namespace OpenLane.Api.Application.Bids.Post;
 
-public record PostBidHandleRequest(Guid IdempotencyKey, Guid BidObjectId, Guid OfferObjectId, decimal Price, Guid UserObjectId)
+public record PostBidCommand(Guid IdempotencyKey, Guid BidObjectId, Guid OfferObjectId, decimal Price, Guid UserObjectId)
 	: IdempotencyBase(IdempotencyKey);
 
-public class PostBidHandler : IHandler<PostBidHandleRequest, Result>
+public record PostBidResponse(Result Result);
+
+public class PostBidHandler : IHandler<PostBidCommand, PostBidResponse>
 {
 	private readonly ILogger<PostBidHandler> _logger;
 	private readonly IBus _bus;
@@ -23,7 +25,7 @@ public class PostBidHandler : IHandler<PostBidHandleRequest, Result>
 		_bus = bus;
 	}
 
-	public async Task<Result> InvokeAsync(PostBidHandleRequest request, CancellationToken cancellationToken = default)
+	public async Task<PostBidResponse> InvokeAsync(PostBidCommand request, CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(request);
 
@@ -32,6 +34,6 @@ public class PostBidHandler : IHandler<PostBidHandleRequest, Result>
 
 		_logger.LogInformation("Successfuly send bid accepted message.");
 
-		return Result<Bid>.Success();
+		return new PostBidResponse(Result.Success());
 	}
 }
