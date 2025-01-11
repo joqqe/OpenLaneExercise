@@ -45,6 +45,11 @@ builder.Services.AddMassTransit(config =>
 
 	config.AddConsumers(typeof(Program).Assembly);
 
+	config.AddConfigureEndpointsCallback((context, name, cfg) =>
+	{
+		cfg.UseMessageRetry(r => r.Incremental(5, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(10)));
+	});
+
 	config.UsingRabbitMq((ctx, cfg) =>
 	{
 		cfg.Host(builder.Configuration.GetConnectionString("MessageQueue"));
