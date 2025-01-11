@@ -5,8 +5,8 @@ import { uuidv4 } from 'https://jslib.k6.io/k6-utils/1.4.0/index.js';
 
 export let options = {
     stages: [
-        { duration: '1m', target: 40 }, // Ramp-up
-        { duration: '2m', target: 40 },  // Stay at
+        { duration: '30s', target: 20 }, // Ramp-up
+        { duration: '1m', target: 20 },  // Stay at
         { duration: '20s', target: 0 },  // Ramp-down
     ],
 };

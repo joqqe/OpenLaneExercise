@@ -12,14 +12,15 @@ using OpenTelemetry.Trace;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenTelemetry()
-	.ConfigureResource(resource => resource.AddService("OpenLane.Api"))
+	.ConfigureResource(resource => resource.AddService("OpenLane.MessageProcessor"))
 	.WithTracing(tracing =>
 	{
 		tracing
 			.AddAspNetCoreInstrumentation()
 			.AddHttpClientInstrumentation()
 			.AddEntityFrameworkCoreInstrumentation()
-			.AddMassTransitInstrumentation();
+			.AddSource("MassTransit")
+			.AddRedisInstrumentation();
 
 		tracing.AddOtlpExporter();
 	})

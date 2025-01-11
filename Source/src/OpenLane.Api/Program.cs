@@ -19,7 +19,8 @@ builder.Services.AddOpenTelemetry()
 			.AddAspNetCoreInstrumentation()
 			.AddHttpClientInstrumentation()
 			.AddEntityFrameworkCoreInstrumentation()
-			.AddMassTransitInstrumentation();
+			.AddSource("MassTransit")
+			.AddRedisInstrumentation();
 
 		tracing.AddOtlpExporter();
 	})
@@ -48,7 +49,7 @@ builder.Services.AddMassTransit(config =>
 	config.SetKebabCaseEndpointNameFormatter();
 
 	config.AddConsumers(typeof(Program).Assembly);
-
+	
 	config.UsingRabbitMq((ctx, cfg) =>
 	{
 		cfg.Host(builder.Configuration.GetConnectionString("MessageQueue"));
