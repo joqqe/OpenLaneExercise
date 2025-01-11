@@ -69,6 +69,7 @@ docker run -d -p 6379:6379 --name redis  redis
 3. Start test by: ```k6 run .\load_test.js --insecure-skip-tls-verify```
 
 ## Todos
+- Send BidCreatedFailedNotification specific user only.
 - Add missing endpoints
     - Update load-test when missing endpoints are implemented, so Prepare-Database.sql can be removed
 - Adding security
