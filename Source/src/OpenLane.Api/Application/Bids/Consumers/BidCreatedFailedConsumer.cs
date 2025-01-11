@@ -10,6 +10,8 @@ namespace OpenLane.Api.Application.Bids.Consumers;
 
 public class BidCreatedFailedConsumer : IConsumer<BidCreatedFailedMessage>
 {
+	public const string IdempotencyTransaction = "BidCreatedFailedNotification";
+
 	private readonly ILogger<BidCreatedFailedConsumer> _logger;
 	private readonly IHubContext<NotificationHub> _hub;
 	private readonly IIdempotencyService _idempotencyService;
@@ -30,7 +32,7 @@ public class BidCreatedFailedConsumer : IConsumer<BidCreatedFailedMessage>
 	{
 		_logger.LogInformation("{Consumer}: {Message}", nameof(BidCreatedFailedConsumer), JsonSerializer.Serialize(context.Message));
 
-		if (await _idempotencyService.IsRequestProcessedAsync(context.Message.IdempotencyKey.ToString(), "BidCreatedFailedNotification"))
+		if (await _idempotencyService.IsRequestProcessedAsync(context.Message.IdempotencyKey.ToString(), IdempotencyTransaction))
 		{
 			_logger.LogWarning("Duplicate message: {IdempontencyKey}.", context.Message.IdempotencyKey);
 			return;
@@ -39,7 +41,7 @@ public class BidCreatedFailedConsumer : IConsumer<BidCreatedFailedMessage>
 		var notification = new BidCreatedFailedNotification(context.Message.BidObjectId, context.Message.ErrorMessage);
 		await _hub.Clients.All.SendAsync("BidCreatedFailed", notification);
 
-		await _idempotencyService.MarkRequestAsProcessedAsync(context.Message.IdempotencyKey.ToString(), "BidCreatedFailedNotification");
+		await _idempotencyService.MarkRequestAsProcessedAsync(context.Message.IdempotencyKey.ToString(), IdempotencyTransaction);
 
 		_logger.LogInformation("Successfuly consumed {Consumer}: {Message}", nameof(BidCreatedFailedConsumer), JsonSerializer.Serialize(context.Message));
 

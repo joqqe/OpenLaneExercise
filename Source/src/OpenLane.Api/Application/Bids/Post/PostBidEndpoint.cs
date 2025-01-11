@@ -15,10 +15,12 @@ public static class PostBidEndpoint
 {
 	public const string InstanceFormat = "/Api/Bid";
 	public const string Instance = InstanceFormat;
+	public const string IdempotencyTransaction = "BidReceived";
 
 	public static WebApplication UsePostBidEndpoint(this WebApplication app)
 	{
 		app.MapPost(Instance, async (
+			[FromHeader(Name = "Idempotency-Key")] Guid idempotencyKey,
 			[FromServices] ILogger<Program> logger,
 			[FromServices] IValidator<PostBidRequest> validator,
 			[FromServices] IHandler<PostBidHandleRequest, Result> handler,
@@ -34,20 +36,7 @@ public static class PostBidEndpoint
 			ArgumentNullException.ThrowIfNull(bus);
 			ArgumentNullException.ThrowIfNull(idempotencyService);
 
-			if (!httpRequest.Headers.TryGetValue("Idempotency-Key", out var idempotencyKey))
-			{
-				var errorMessage = "Idempotency-Key header is missing.";
-				logger.LogWarning(errorMessage);
-				return Results.BadRequest(errorMessage);
-			}
-			if (string.IsNullOrWhiteSpace(idempotencyKey)
-				|| !Guid.TryParse(idempotencyKey, out var idempotencyKeyGuid))
-			{
-				var errorMessage = "Invalid Idempotency-Key header.";
-				logger.LogWarning(errorMessage);
-				return Results.BadRequest(errorMessage);
-			}
-			if (await idempotencyService.IsRequestProcessedAsync(idempotencyKey!, "ReceivedBid"))
+			if (await idempotencyService.IsRequestProcessedAsync(idempotencyKey!.ToString(), IdempotencyTransaction))
 			{
 				var errorMessage = string.Format("Duplicate request: {0}.", idempotencyKey!);
 				logger.LogWarning(errorMessage);
@@ -61,10 +50,10 @@ public static class PostBidEndpoint
 				return Results.Problem(problemDetails);
 			}
 
-			var postBidRequest = new PostBidHandleRequest(idempotencyKeyGuid, request.BidObjectId, request.OfferObjectId, request.Price, request.UserObjectId);
+			var postBidRequest = new PostBidHandleRequest(idempotencyKey, request.BidObjectId, request.OfferObjectId, request.Price, request.UserObjectId);
 			await handler.InvokeAsync(postBidRequest, cancellationToken);
 
-			await idempotencyService.MarkRequestAsProcessedAsync(idempotencyKey!, "ReceivedBid");
+			await idempotencyService.MarkRequestAsProcessedAsync(idempotencyKey!.ToString(), IdempotencyTransaction);
 
 			logger.LogInformation("Successfuly send bid accepted.");
 
@@ -73,6 +62,7 @@ public static class PostBidEndpoint
 		.WithName("PostBid")
 		.Produces(StatusCodes.Status202Accepted)
 		.Produces(StatusCodes.Status400BadRequest)
+		.Produces(StatusCodes.Status409Conflict)
 		.ProducesValidationProblem()
 		.WithOpenApi();
 

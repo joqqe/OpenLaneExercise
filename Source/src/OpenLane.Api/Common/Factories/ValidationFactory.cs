@@ -12,9 +12,14 @@ public static class ValidationFactory
 		if (validationResult.IsValid)
 			return null;
 
-		var problemDetails = new HttpValidationProblemDetails(new Dictionary<string, string[]>
+		return GetProblemDetails(validationResult.Errors.Select(x => x.ErrorMessage).ToArray(), instance);
+	}
+
+	public static HttpValidationProblemDetails GetProblemDetails(string[] errorMessages, string instance)
+	{
+		return new HttpValidationProblemDetails(new Dictionary<string, string[]>
 		{
-			{ "ValidationErrors", validationResult.Errors.Select(x => x.ErrorMessage).ToArray() }
+			{ "ValidationErrors", errorMessages }
 		})
 		{
 			Status = StatusCodes.Status400BadRequest,
@@ -22,7 +27,5 @@ public static class ValidationFactory
 			Detail = "One of more validation errors occurred.",
 			Instance = instance
 		};
-
-		return problemDetails;
 	}
 }

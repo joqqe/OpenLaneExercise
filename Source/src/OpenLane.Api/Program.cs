@@ -8,6 +8,7 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using FluentValidation;
 using OpenLane.Api.Hub;
+using OpenLane.Api.Common.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -78,6 +79,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseMiddleware<IdempotencyCheckMiddleware>();
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
