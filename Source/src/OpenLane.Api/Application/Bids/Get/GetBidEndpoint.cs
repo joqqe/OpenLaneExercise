@@ -32,14 +32,14 @@ public static class GetBidEndpoint
 				return Results.Problem(problemDetails);
 			}
 
-			var response = await handler.InvokeAsync(request, cancellationToken);
-			if (response.Result.IsFailure)
-				return Results.Problem(response.Result.Error, Instance, StatusCodes.Status400BadRequest, "A functional exception has occured.");
+			var result = await handler.InvokeAsync(request, cancellationToken);
+			if (result.IsFailure)
+				return Results.Problem(result.Error, Instance, StatusCodes.Status400BadRequest, "A functional exception has occured.");
 
-			if (response.Result.Value is null)
+			if (result.Value is null)
 				return Results.NotFound();
 
-			var dto = new BidDto(response.Result.Value.ObjectId, response.Result.Value.Price, response.Result.Value.Offer.ObjectId);
+			var dto = new BidDto(result.Value.ObjectId, result.Value.Price, result.Value.Offer.ObjectId);
 			logger.LogInformation("Successfuly send bid dto.");
 			return Results.Ok(dto);
 		})

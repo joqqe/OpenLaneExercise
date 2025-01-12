@@ -1,9 +1,6 @@
 using MassTransit;
-using OpenLane.Common;
-using OpenLane.Common.Interfaces;
-using OpenLane.Domain;
+using OpenLane.Common.Helpers;
 using OpenLane.Infrastructure;
-using OpenLane.MessageProcessor.Handlers;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -60,7 +57,7 @@ builder.Services.AddMassTransit(config =>
 });
 
 builder.Services.AddInfra(builder.Configuration);
-builder.Services.AddScoped<IHandler<CreateBidRequest, Result<Bid>>, CreateBidHandler>();
+builder.Services.AddHandlers(typeof(Program));
 
 var app = builder.Build();
 

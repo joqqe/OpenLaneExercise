@@ -9,9 +9,9 @@ namespace OpenLane.Api.Application.Bids.Post;
 public record PostBidCommand(Guid IdempotencyKey, Guid BidObjectId, Guid OfferObjectId, decimal Price, Guid UserObjectId)
 	: IdempotencyBase(IdempotencyKey);
 
-public record PostBidResponse(Result Result);
+public record PostBidResult(Result Result);
 
-public class PostBidHandler : IHandler<PostBidCommand, PostBidResponse>
+public class PostBidHandler : IHandler<PostBidCommand, Result>
 {
 	private readonly ILogger<PostBidHandler> _logger;
 	private readonly IBus _bus;
@@ -25,7 +25,7 @@ public class PostBidHandler : IHandler<PostBidCommand, PostBidResponse>
 		_bus = bus;
 	}
 
-	public async Task<PostBidResponse> InvokeAsync(PostBidCommand request, CancellationToken cancellationToken = default)
+	public async Task<Result> InvokeAsync(PostBidCommand request, CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(request);
 
@@ -34,6 +34,6 @@ public class PostBidHandler : IHandler<PostBidCommand, PostBidResponse>
 
 		_logger.LogInformation("Successfuly send bid accepted message.");
 
-		return new PostBidResponse(Result.Success());
+		return Result.Success();
 	}
 }

@@ -1,7 +1,4 @@
 ﻿using MassTransit;
-using OpenLane.Common.Interfaces;
-using OpenLane.Common;
-using OpenLane.Domain;
 using OpenLane.Domain.Messages;
 using OpenLane.MessageProcessor.Handlers;
 using System.Text.Json;
@@ -14,12 +11,13 @@ public class BidReceivedConsumer : IConsumer<BidReceivedMessage>
 	public const string IdempotencyTransaction = "BidCreated";
 
 	private readonly ILogger<BidReceivedConsumer> _logger;
-	private readonly IHandler<CreateBidRequest, Result<Bid>> _handler;
+	private readonly CreateBidHandler _handler;
 	private readonly IBus _bus;
 	private readonly IIdempotencyService _idempotencyService;
 
-	public BidReceivedConsumer(ILogger<BidReceivedConsumer> logger, IHandler<CreateBidRequest, 
-		Result<Bid>> handler, IBus bus, IIdempotencyService idempotencyService)
+	public BidReceivedConsumer(ILogger<BidReceivedConsumer> logger,
+		CreateBidHandler handler, IBus bus,
+		IIdempotencyService idempotencyService)
 	{
 		ArgumentNullException.ThrowIfNull(logger);
 		ArgumentNullException.ThrowIfNull(handler);
@@ -45,7 +43,7 @@ public class BidReceivedConsumer : IConsumer<BidReceivedMessage>
 			return;
 		}
 
-		var request = new CreateBidRequest(context.Message.BidObjectId, context.Message.OfferObjectId, context.Message.Price, context.Message.UserObjectId);
+		var request = new CreateBidCommand(context.Message.BidObjectId, context.Message.OfferObjectId, context.Message.Price, context.Message.UserObjectId);
 		var result = await _handler.InvokeAsync(request);
 
 		if (result.IsFailure)

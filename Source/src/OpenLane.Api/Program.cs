@@ -1,4 +1,3 @@
-using OpenLane.Api.Application.Bids;
 using OpenLane.Api.Common.Exceptions;
 using OpenLane.Infrastructure;
 using MassTransit;
@@ -9,6 +8,7 @@ using OpenTelemetry.Trace;
 using FluentValidation;
 using OpenLane.Api.Hub;
 using OpenLane.Api.Common.Middleware;
+using OpenLane.Common.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -68,7 +68,8 @@ builder.Services.AddMassTransit(config =>
 builder.Services.AddSignalR();
 
 builder.Services.AddInfra(builder.Configuration);
-builder.Services.AddBids();
+
+builder.Services.AddHandlers(typeof(Program));
 
 // ------------------------
 
@@ -90,7 +91,7 @@ app.UseHttpsRedirection();
 app.MapHealthChecks("/api/health");
 app.MapHub<NotificationHub>("/api/notification");
 
-app.UseBids();
+app.UseEndpoints(typeof(Program));
 
 app.Run();
 

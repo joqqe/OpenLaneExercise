@@ -6,9 +6,9 @@ using OpenLane.Common.Interfaces;
 
 namespace OpenLane.MessageProcessor.Handlers;
 
-public record CreateBidRequest(Guid BidObjectId, Guid OfferObjectId, decimal Price, Guid UserObjectId);
+public record CreateBidCommand(Guid BidObjectId, Guid OfferObjectId, decimal Price, Guid UserObjectId);
 
-public class CreateBidHandler : IHandler<CreateBidRequest, Result<Bid>>
+public class CreateBidHandler : IHandler<CreateBidCommand, Result<Bid>>
 {
 	private readonly ILogger<CreateBidHandler> _logger;
 	private readonly AppDbContext _appContext;
@@ -22,7 +22,7 @@ public class CreateBidHandler : IHandler<CreateBidRequest, Result<Bid>>
 		_appContext = appContext;
 	}
 
-	public async Task<Result<Bid>> InvokeAsync(CreateBidRequest request, CancellationToken cancellationToken = default)
+	public async Task<Result<Bid>> InvokeAsync(CreateBidCommand request, CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(request);
 
