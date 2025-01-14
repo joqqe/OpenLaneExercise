@@ -13,7 +13,7 @@ public class GetBidHandler : IHandler<GetBidQuery, Result<Bid?>>
 	private readonly ILogger<GetBidHandler> _logger;
 	private readonly AppDbContext _appContext;
 
-	public GetBidHandler(ILogger<GetBidHandler> logger,AppDbContext appContext)
+	public GetBidHandler(ILogger<GetBidHandler> logger, AppDbContext appContext)
 	{
 		ArgumentNullException.ThrowIfNull(logger);
 		ArgumentNullException.ThrowIfNull(appContext);

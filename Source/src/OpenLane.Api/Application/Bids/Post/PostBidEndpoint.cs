@@ -4,18 +4,19 @@ using OpenLane.Api.Common.Factories;
 using Microsoft.AspNetCore.Mvc;
 using MassTransit;
 using OpenLane.Domain.Services;
+using OpenLane.Common.Interfaces;
 
 namespace OpenLane.Api.Application.Bids.Post;
 
 public record PostBidRequest(Guid BidObjectId, Guid OfferObjectId, decimal Price, Guid UserObjectId);
 
-public static class PostBidEndpoint
+public class PostBidEndpoint : IEndpoint
 {
 	public const string InstanceFormat = "/Api/Bid";
 	public const string Instance = InstanceFormat;
 	public const string IdempotencyTransaction = "BidReceived";
 
-	public static WebApplication UsePostBidEndpoint(this WebApplication app)
+	public IEndpointRouteBuilder UseEndpoint(IEndpointRouteBuilder app)
 	{
 		app.MapPost(Instance, async (
 			[FromHeader(Name = "Idempotency-Key")] Guid idempotencyKey,

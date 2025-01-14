@@ -2,15 +2,16 @@
 using OpenLane.Api.Common.Factories;
 using OpenLane.Api.Application.Dtos;
 using Microsoft.AspNetCore.Mvc;
+using OpenLane.Common.Interfaces;
 
 namespace OpenLane.Api.Application.Bids.Get;
 
-public static class GetBidEndpoint
+public class GetBidEndpoint : IEndpoint
 {
 	public const string InstanceFormat = "/Api/Bid/{0}";
 	public static readonly string Instance = string.Format(InstanceFormat, "{objectId}");
 
-	public static WebApplication UseGetBidEndpoint(this WebApplication app)
+	public IEndpointRouteBuilder UseEndpoint(IEndpointRouteBuilder app)
 	{
 		app.MapGet(Instance, async (
 			[FromServices] ILogger<Program> logger,

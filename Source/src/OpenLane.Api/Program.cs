@@ -8,7 +8,8 @@ using OpenTelemetry.Trace;
 using FluentValidation;
 using OpenLane.Api.Hub;
 using OpenLane.Api.Common.Middleware;
-using OpenLane.Common.Helpers;
+using OpenLane.Common.Extensions;
+using Microsoft.AspNetCore.Builder;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -69,7 +70,7 @@ builder.Services.AddSignalR();
 
 builder.Services.AddInfra(builder.Configuration);
 
-builder.Services.AddHandlers(typeof(Program));
+builder.Services.AddHandlers(typeof(Program).Assembly);
 
 // ------------------------
 
@@ -91,7 +92,7 @@ app.UseHttpsRedirection();
 app.MapHealthChecks("/api/health");
 app.MapHub<NotificationHub>("/api/notification");
 
-app.UseEndpoints(typeof(Program));
+app.UseEndpoints(typeof(Program).Assembly);
 
 app.Run();
 

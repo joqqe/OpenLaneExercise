@@ -1,5 +1,5 @@
 using MassTransit;
-using OpenLane.Common.Helpers;
+using OpenLane.Common.Extensions;
 using OpenLane.Infrastructure;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
@@ -57,7 +57,7 @@ builder.Services.AddMassTransit(config =>
 });
 
 builder.Services.AddInfra(builder.Configuration);
-builder.Services.AddHandlers(typeof(Program));
+builder.Services.AddHandlers(typeof(Program).Assembly);
 
 var app = builder.Build();
 
