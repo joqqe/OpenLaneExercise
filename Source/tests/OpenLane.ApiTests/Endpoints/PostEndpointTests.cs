@@ -1,5 +1,4 @@
-﻿using Azure.Core;
-using FluentAssertions;
+﻿using FluentAssertions;
 using MassTransit.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using OpenLane.Api.Application.Bids.Get;

@@ -1,5 +1,4 @@
-﻿using Azure.Core;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using OpenLane.Api.Application.Bids.Get;
 using OpenLane.Api.Application.Dtos;

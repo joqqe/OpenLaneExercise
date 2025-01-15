@@ -9,11 +9,8 @@ using FluentValidation;
 using OpenLane.Api.Hub;
 using OpenLane.Api.Common.Middleware;
 using OpenLane.Common.Extensions;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.Extensions.DependencyInjection;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
