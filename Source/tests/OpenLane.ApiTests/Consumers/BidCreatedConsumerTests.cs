@@ -3,6 +3,7 @@ using MassTransit.Testing;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
 using OpenLane.Api.Application.Bids.Consumers;
+using OpenLane.ApiTests.Helpers;
 using OpenLane.Domain.Messages;
 using OpenLane.Domain.Notifications;
 
@@ -18,30 +19,17 @@ public class BidCreatedConsumerTests : IClassFixture<ApiWebApplicationFactory>
 		_application = application;
 	}
 
-	private async Task<HubConnection> CreateHubConnectionAsync()
-	{
-		var connection = new HubConnectionBuilder()
-			.WithUrl("http://127.0.0.1/api/notification", options =>
-			{
-				options.HttpMessageHandlerFactory = _ => _application.Server.CreateHandler();
-			})
-			.Build();
-
-		await connection.StartAsync();
-		return connection;
-	}
-
-
 	[Fact]
 	public async Task BidCreatedConsumer_Should_SendNotification()
 	{
-		var connection = await CreateHubConnectionAsync();
+		var connection = await SignalRHelper.CreateHubConnectionAsync(
+			_application, "http://127.0.0.1/api/notification", _application.AccessToken);
 		var harness = _application.Services.GetRequiredService<ITestHarness>();
 		var cancellationTokenSource = new CancellationTokenSource();
 
 		// Arrange
 		var message = new BidCreatedMessage(
-			Guid.NewGuid(),  Guid.NewGuid(), _application.OpenOffer.ObjectId, 120m, Guid.NewGuid());
+			Guid.NewGuid(),  Guid.NewGuid(), _application.OpenOffer.ObjectId, 120m, _application.UserObjectId);
 
 		BidCreatedNotification notification = default!; 
 		connection.On<BidCreatedNotification>("BidCreated", (message) =>
@@ -68,19 +56,19 @@ public class BidCreatedConsumerTests : IClassFixture<ApiWebApplicationFactory>
 		notification!.BidObjectId.Should().Be(message.BidObjectId);
 		notification.OfferObjectId.Should().Be(message.OfferObjectId);
 		notification.Price.Should().Be(message.Price);
-		notification.UserObjectId.Should().Be(message.UserObjectId);
 	}
 
 	[Fact]
 	public async Task BidCreatedConsumer_DoubleIdempotencyKey_NotSendNotification()
 	{
-		var connection = await CreateHubConnectionAsync();
+		var connection = await SignalRHelper.CreateHubConnectionAsync(
+			_application, "http://127.0.0.1/api/notification", _application.AccessToken);
 		var harness = _application.Services.GetRequiredService<ITestHarness>();
 		var cancellationTokenSource = new CancellationTokenSource();
 
 		// Arrange
 		var message = new BidCreatedMessage(
-			Guid.NewGuid(), Guid.NewGuid(), _application.OpenOffer.ObjectId, 120m, Guid.NewGuid());
+			Guid.NewGuid(), Guid.NewGuid(), _application.OpenOffer.ObjectId, 120m, _application.UserObjectId);
 
 		BidCreatedNotification notification = default!;
 		connection.On<BidCreatedNotification>("BidCreated", (message) =>
@@ -107,7 +95,6 @@ public class BidCreatedConsumerTests : IClassFixture<ApiWebApplicationFactory>
 		notification!.BidObjectId.Should().Be(message.BidObjectId);
 		notification.OfferObjectId.Should().Be(message.OfferObjectId);
 		notification.Price.Should().Be(message.Price);
-		notification.UserObjectId.Should().Be(message.UserObjectId);
 
 		// Arrange second publish
 		notification = default!;

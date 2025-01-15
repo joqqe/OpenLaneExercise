@@ -32,7 +32,8 @@ public class PostEndpointTests : IClassFixture<ApiWebApplicationFactory>
 		var requestUri = string.Format(PostBidEndpoint.InstanceFormat);
 		var bodyObject = new PostBidRequest(bidObjectId, _application.OpenOffer.ObjectId, bidPrice, Guid.NewGuid());
 		var bodyString = new StringContent(JsonSerializer.Serialize(bodyObject), Encoding.UTF8, "application/json");
-
+		
+		_client.DefaultRequestHeaders.Add("Authorization", "Bearer " + _application.AccessToken);
 		_client.DefaultRequestHeaders.Add("Idempotency-Key", Guid.NewGuid().ToString());
 
 		// Act
@@ -53,6 +54,8 @@ public class PostEndpointTests : IClassFixture<ApiWebApplicationFactory>
 
 		var requestUri = string.Format(PostBidEndpoint.InstanceFormat);
 		var bodyString = new StringContent(JsonSerializer.Serialize(bodyObject), Encoding.UTF8, "application/json");
+		
+		_client.DefaultRequestHeaders.Add("Authorization", "Bearer " + _application.AccessToken);
 		_client.DefaultRequestHeaders.Add("Idempotency-Key", Guid.NewGuid().ToString());
 
 		var response = await _client.PostAsync(requestUri, bodyString);
@@ -82,6 +85,7 @@ public class PostEndpointTests : IClassFixture<ApiWebApplicationFactory>
 		var bodyObject = new PostBidRequest(bidObjectId, _application.OpenOffer.ObjectId, bidPrice, Guid.NewGuid());
 		var bodyString = new StringContent(JsonSerializer.Serialize(bodyObject), Encoding.UTF8, "application/json");
 
+		_client.DefaultRequestHeaders.Add("Authorization", "Bearer " + _application.AccessToken);
 		_client.DefaultRequestHeaders.Add("Idempotency-Key", idempotency);
 
 		// Act

@@ -38,8 +38,10 @@ public class BidCreatedConsumer : IConsumer<BidCreatedMessage>
 			return;
 		}
 
-		var notification = new BidCreatedNotification(context.Message.BidObjectId, context.Message.OfferObjectId, context.Message.Price, context.Message.UserObjectId);
-		await _hub.Clients.All.SendAsync("BidCreated", notification);
+		var notification = new BidCreatedNotification(context.Message.BidObjectId, context.Message.OfferObjectId, context.Message.Price);
+		await _hub.Clients
+			.Group(context.Message.UserObjectId.ToString())
+			.SendAsync("BidCreated", notification);
 
 		await _idempotencyService.MarkRequestAsProcessedAsync(context.Message.IdempotencyKey.ToString(), IdempotencyTransaction);
 

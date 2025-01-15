@@ -8,6 +8,8 @@ using OpenLane.Domain;
 using OpenLane.Infrastructure;
 using MassTransit;
 using OpenLane.Api.Application.Bids.Consumers;
+using OpenLane.ApiTests.Helpers;
+using Microsoft.AspNetCore.Builder.Extensions;
 
 namespace OpenLane.ApiTests;
 
@@ -18,6 +20,8 @@ public class ApiWebApplicationFactory : WebApplicationFactory<Program>
 	public readonly Offer ClosedOffer;
 	public readonly Offer FutureOffer;
 	public readonly Bid Bid;
+	public readonly Guid UserObjectId;
+	public readonly string AccessToken;
 	private readonly EnvironmentContainersFixture _environmentContainers;
 
 	public ApiWebApplicationFactory(EnvironmentContainersFixture environmentContainers)
@@ -28,6 +32,15 @@ public class ApiWebApplicationFactory : WebApplicationFactory<Program>
 		ClosedOffer = TestDataFactory.CreateClosedOffer();
 		FutureOffer = TestDataFactory.CreateFutureOffer();
 		Bid = TestDataFactory.CreateBid(OpenOffer);
+
+		UserObjectId = Guid.NewGuid();
+		AccessToken = JwtTokenHelper.GenerateToken(
+			UserObjectId.ToString(),
+			"TestUser",
+			"yourIssuer",
+			"yourAudience",
+			DateTime.Now.AddMinutes(30),
+			"your_very_long_secret_key_that_is_at_least_32_characters_long");
 	}
 
 	protected override void ConfigureWebHost(IWebHostBuilder builder)

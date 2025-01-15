@@ -3,6 +3,7 @@ using OpenLane.Api.Common.Factories;
 using OpenLane.Api.Application.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using OpenLane.Common.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 namespace OpenLane.Api.Application.Bids.Get;
 
@@ -13,7 +14,7 @@ public class GetBidEndpoint : IEndpoint
 
 	public IEndpointRouteBuilder UseEndpoint(IEndpointRouteBuilder app)
 	{
-		app.MapGet(Instance, async (
+		app.MapGet(Instance, [Authorize] async (
 			[FromServices] ILogger<Program> logger,
 			[FromServices] IValidator<GetBidQuery> validator,
 			[FromServices] GetBidHandler handler,

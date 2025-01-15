@@ -3,6 +3,7 @@ using MassTransit.Testing;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
 using OpenLane.Api.Application.Bids.Consumers;
+using OpenLane.ApiTests.Helpers;
 using OpenLane.Domain.Messages;
 using OpenLane.Domain.Notifications;
 
@@ -18,29 +19,17 @@ public class BidCreatedFailedConsumerTests : IClassFixture<ApiWebApplicationFact
 		_application = application;
 	}
 
-	private async Task<HubConnection> CreateHubConnectionAsync()
-	{
-		var connection = new HubConnectionBuilder()
-			.WithUrl("http://127.0.0.1/api/notification", options =>
-			{
-				options.HttpMessageHandlerFactory = _ => _application.Server.CreateHandler();
-			})
-			.Build();
-
-		await connection.StartAsync();
-		return connection;
-	}
-
 	[Fact]
 	public async Task BidCreatedFailedConsumer_Should_SendNotification()
 	{
-		var connection = await CreateHubConnectionAsync();
+		var connection = await SignalRHelper.CreateHubConnectionAsync(
+			_application, "http://127.0.0.1/api/notification", _application.AccessToken);
 		var harness = _application.Services.GetRequiredService<ITestHarness>();
 		var cancellationTokenSource = new CancellationTokenSource();
 
 		// Arrange
 		var message = new BidCreatedFailedMessage(
-			Guid.NewGuid(), Guid.NewGuid(), "Failed to create bid.");
+			Guid.NewGuid(), Guid.NewGuid(), "Failed to create bid.", _application.UserObjectId);
 
 		BidCreatedFailedNotification notification = default!;
 		connection.On<BidCreatedFailedNotification>("BidCreatedFailed", (message) =>
@@ -71,13 +60,14 @@ public class BidCreatedFailedConsumerTests : IClassFixture<ApiWebApplicationFact
 	[Fact]
 	public async Task BidCreatedFailedConsumer_DoubleIdempotencyKey_NotSendNotification()
 	{
-		var connection = await CreateHubConnectionAsync();
+		var connection = await SignalRHelper.CreateHubConnectionAsync(
+			_application, "http://127.0.0.1/api/notification", _application.AccessToken);
 		var harness = _application.Services.GetRequiredService<ITestHarness>();
 		var cancellationTokenSource = new CancellationTokenSource();
 
 		// Arrange
 		var message = new BidCreatedFailedMessage(
-			Guid.NewGuid(), Guid.NewGuid(), "Failed to create bid.");
+			Guid.NewGuid(), Guid.NewGuid(), "Failed to create bid.", _application.UserObjectId);
 
 		BidCreatedFailedNotification notification = default!;
 		connection.On<BidCreatedFailedNotification>("BidCreatedFailed", (message) =>

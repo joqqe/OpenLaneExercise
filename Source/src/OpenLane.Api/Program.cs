@@ -10,6 +10,11 @@ using OpenLane.Api.Hub;
 using OpenLane.Api.Common.Middleware;
 using OpenLane.Common.Extensions;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.Extensions.DependencyInjection;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,6 +71,31 @@ builder.Services.AddMassTransit(config =>
 	});
 });
 
+builder.Services
+	.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+	.AddJwtBearer(options =>
+	{
+		var secret = "your_very_long_secret_key_that_is_at_least_32_characters_long";
+		var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
+
+		options.RequireHttpsMetadata = false;
+		options.TokenValidationParameters = new TokenValidationParameters
+		{
+			ValidIssuer = "yourIssuer",
+			ValidateIssuer = true,
+			
+			ValidAudience = "yourAudience",
+			ValidateAudience = true,
+			
+			IssuerSigningKey = key,
+			ValidateIssuerSigningKey = true,
+			
+			ValidateLifetime = true
+		};
+		options.Validate();
+	});
+builder.Services.AddAuthorization();
+
 builder.Services.AddSignalR();
 
 builder.Services.AddInfra(builder.Configuration);
@@ -88,6 +118,9 @@ app.UseExceptionHandler();
 app.UseStatusCodePages();
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapHealthChecks("/api/health");
 app.MapHub<NotificationHub>("/api/notification");

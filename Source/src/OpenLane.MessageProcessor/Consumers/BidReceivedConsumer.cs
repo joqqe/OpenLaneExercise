@@ -36,7 +36,11 @@ public class BidReceivedConsumer : IConsumer<BidReceivedMessage>
 
 		if (await _idempotencyService.IsRequestProcessedAsync(context.Message.IdempotencyKey.ToString(), IdempotencyTransaction))
 		{
-			var createdFailedMessage = new BidCreatedFailedMessage(context.Message.IdempotencyKey, context.Message.BidObjectId, string.Format("Duplicate message: {0}.", context.Message.IdempotencyKey));
+			var createdFailedMessage = new BidCreatedFailedMessage(
+				context.Message.IdempotencyKey,
+				context.Message.BidObjectId,
+				string.Format("Duplicate message: {0}.", context.Message.IdempotencyKey),
+				context.Message.UserObjectId);
 			await _bus.Publish(createdFailedMessage);
 
 			_logger.LogWarning("Failed to consume {Consumer}: {Message}", nameof(BidReceivedConsumer), JsonSerializer.Serialize(context.Message));
@@ -48,7 +52,11 @@ public class BidReceivedConsumer : IConsumer<BidReceivedMessage>
 
 		if (result.IsFailure)
 		{
-			var createdFailedMessage = new BidCreatedFailedMessage(context.Message.IdempotencyKey, context.Message.BidObjectId, result.Error ?? "Failed to create bid.");
+			var createdFailedMessage = new BidCreatedFailedMessage(
+				context.Message.IdempotencyKey, 
+				context.Message.BidObjectId,
+				result.Error ?? "Failed to create bid.",
+				context.Message.UserObjectId);
 			await _bus.Publish(createdFailedMessage);
 
 			_logger.LogWarning("Failed to consume {Consumer}: {Message}", nameof(BidReceivedConsumer), JsonSerializer.Serialize(context.Message));

@@ -1,6 +1,8 @@
-﻿using FluentAssertions;
+﻿using Azure.Core;
+using FluentAssertions;
 using OpenLane.Api.Application.Bids.Get;
 using OpenLane.Api.Application.Dtos;
+using OpenLane.ApiTests.Helpers;
 using System.Net;
 using System.Text.Json;
 
@@ -22,6 +24,7 @@ public class GetBidEndpointTests : IClassFixture<ApiWebApplicationFactory>
 	public async Task GetBids_ShouldReturn_200OK()
 	{
 		var requestUri = string.Format(GetBidEndpoint.InstanceFormat, _application.Bid.ObjectId);
+		_client.DefaultRequestHeaders.Add("Authorization", "Bearer " + _application.AccessToken);
 		var response = await _client.GetAsync(requestUri);
 
 		response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -40,6 +43,7 @@ public class GetBidEndpointTests : IClassFixture<ApiWebApplicationFactory>
 	{
 		var bidObjectId = Guid.NewGuid();
 		var requestUri = string.Format(GetBidEndpoint.InstanceFormat, Guid.NewGuid());
+		_client.DefaultRequestHeaders.Add("Authorization", "Bearer " + _application.AccessToken);
 		var response = await _client.GetAsync(requestUri);
 
 		response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -49,6 +53,7 @@ public class GetBidEndpointTests : IClassFixture<ApiWebApplicationFactory>
 	public async Task GetBids_ShouldReturn_400BadRequest()
 	{
 		var requestUri = string.Format(GetBidEndpoint.InstanceFormat, Guid.Empty);
+		_client.DefaultRequestHeaders.Add("Authorization", "Bearer " + _application.AccessToken);
 		var response = await _client.GetAsync(requestUri);
 
 		response.StatusCode.Should().Be(HttpStatusCode.BadRequest);

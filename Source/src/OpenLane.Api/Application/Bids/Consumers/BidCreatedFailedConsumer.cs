@@ -39,7 +39,9 @@ public class BidCreatedFailedConsumer : IConsumer<BidCreatedFailedMessage>
 		}
 
 		var notification = new BidCreatedFailedNotification(context.Message.BidObjectId, context.Message.ErrorMessage);
-		await _hub.Clients.All.SendAsync("BidCreatedFailed", notification);
+		await _hub.Clients
+			.Group(context.Message.UserObjectId.ToString())
+			.SendAsync("BidCreatedFailed", notification);
 
 		await _idempotencyService.MarkRequestAsProcessedAsync(context.Message.IdempotencyKey.ToString(), IdempotencyTransaction);
 
