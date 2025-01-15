@@ -13,17 +13,20 @@ namespace OpenLane.ApiTests.Consumers;
 public class BidCreatedFailedConsumerTests : IClassFixture<ApiWebApplicationFactory>
 {
 	private readonly ApiWebApplicationFactory _application;
+	private readonly string _accessToken;
 
 	public BidCreatedFailedConsumerTests(ApiWebApplicationFactory application)
 	{
 		_application = application;
+		_accessToken = application.Services.GetRequiredService<AccessTokenProvider>()
+			.GetToken(_application.UserObjectId.ToString());
 	}
 
 	[Fact]
 	public async Task BidCreatedFailedConsumer_Should_SendNotification()
 	{
 		var connection = await SignalRHelper.CreateHubConnectionAsync(
-			_application, "http://127.0.0.1/api/notification", _application.AccessToken);
+			_application, "http://127.0.0.1/api/notification", _accessToken);
 		var harness = _application.Services.GetRequiredService<ITestHarness>();
 		var cancellationTokenSource = new CancellationTokenSource();
 
@@ -61,7 +64,7 @@ public class BidCreatedFailedConsumerTests : IClassFixture<ApiWebApplicationFact
 	public async Task BidCreatedFailedConsumer_DoubleIdempotencyKey_NotSendNotification()
 	{
 		var connection = await SignalRHelper.CreateHubConnectionAsync(
-			_application, "http://127.0.0.1/api/notification", _application.AccessToken);
+			_application, "http://127.0.0.1/api/notification", _accessToken);
 		var harness = _application.Services.GetRequiredService<ITestHarness>();
 		var cancellationTokenSource = new CancellationTokenSource();
 

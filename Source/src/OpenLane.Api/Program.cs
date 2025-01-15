@@ -75,16 +75,16 @@ builder.Services
 	.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 	.AddJwtBearer(options =>
 	{
-		var secret = "your_very_long_secret_key_that_is_at_least_32_characters_long";
+		var secret = builder.Configuration.GetValue<string>("Authentication:Secret")!;
 		var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
 
 		options.RequireHttpsMetadata = false;
 		options.TokenValidationParameters = new TokenValidationParameters
 		{
-			ValidIssuer = "yourIssuer",
+			ValidIssuer = builder.Configuration.GetValue<string>("Authentication:Issuer"),
 			ValidateIssuer = true,
 			
-			ValidAudience = "yourAudience",
+			ValidAudience = builder.Configuration.GetValue<string>("Authentication:Audience"),
 			ValidateAudience = true,
 			
 			IssuerSigningKey = key,
