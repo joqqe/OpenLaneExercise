@@ -11,22 +11,24 @@ public record CreateBidCommand(Guid BidObjectId, Guid OfferObjectId, decimal Pri
 public class CreateBidHandler : IHandler<CreateBidCommand, Result<Bid>>
 {
 	private readonly ILogger<CreateBidHandler> _logger;
-	private readonly AppDbContext _appContext;
+	private readonly IDbContextFactory<AppDbContext> _appContextFactory;
 
-	public CreateBidHandler(ILogger<CreateBidHandler> logger, AppDbContext appContext)
+	public CreateBidHandler(ILogger<CreateBidHandler> logger, IDbContextFactory<AppDbContext> appContextFactory)
 	{
 		ArgumentNullException.ThrowIfNull(logger);
-		ArgumentNullException.ThrowIfNull(appContext);
+		ArgumentNullException.ThrowIfNull(appContextFactory);
 
 		_logger = logger;
-		_appContext = appContext;
+		_appContextFactory = appContextFactory;
 	}
 
 	public async Task<Result<Bid>> InvokeAsync(CreateBidCommand request, CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(request);
 
-		var offer = await _appContext.Offers.SingleOrDefaultAsync(x => x.ObjectId == request.OfferObjectId, cancellationToken);
+		var appContext = await _appContextFactory.CreateDbContextAsync();
+
+		var offer = await appContext.Offers.SingleOrDefaultAsync(x => x.ObjectId == request.OfferObjectId, cancellationToken);
 		if (offer is null)
 		{
 			var errorMessage = "No offer was been found.";
@@ -49,7 +51,7 @@ public class CreateBidHandler : IHandler<CreateBidCommand, Result<Bid>>
 			return Result<Bid>.Failure(errorMessage);
 		}
 
-		var isBidLowerOrEqualThenPrevious = await _appContext.Bids
+		var isBidLowerOrEqualThenPrevious = await appContext.Bids
 			.AsNoTracking()
 			.AnyAsync(x => x.UserObjectId == request.UserObjectId && x.Price >= request.Price, cancellationToken);
 		if (isBidLowerOrEqualThenPrevious)
@@ -68,8 +70,8 @@ public class CreateBidHandler : IHandler<CreateBidCommand, Result<Bid>>
 			UserObjectId = request.UserObjectId,
 			ReceivedAt = DateTimeOffset.Now
 		};
-		await _appContext.Bids.AddAsync(newBid, cancellationToken);
-		await _appContext.SaveChangesAsync(cancellationToken);
+		await appContext.Bids.AddAsync(newBid, cancellationToken);
+		await appContext.SaveChangesAsync(cancellationToken);
 
 		_logger.LogInformation("Successfuly created bid entity: {Entity}", newBid);
 

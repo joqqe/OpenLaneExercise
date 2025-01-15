@@ -10,7 +10,7 @@ public static class ConfigureInfraExtentions
 {
 	public static IServiceCollection AddInfra(this IServiceCollection services, IConfiguration configuration)
 	{
-		services.AddDbContext<AppDbContext>(options =>
+		services.AddDbContextFactory<AppDbContext>(options =>
 		{
 			options.UseSqlServer(configuration.GetConnectionString("AppDB"));
 		});
