@@ -22,9 +22,11 @@ public class IdempotencyService : IIdempotencyService
 
 	public async Task MarkRequestAsProcessedAsync(string key, string transaction)
 	{
-		await _cache.SetStringAsync($"{key}--{transaction}", "processed", new DistributedCacheEntryOptions
+		var options = new DistributedCacheEntryOptions
 		{
 			AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(4)
-		});
+		};
+
+		await _cache.SetStringAsync($"{key}--{transaction}", "processed", options);
 	}
 }
