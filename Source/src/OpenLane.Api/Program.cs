@@ -63,7 +63,7 @@ builder.Services.AddMassTransit(config =>
 	{
 		cfg.Host(builder.Configuration.GetConnectionString("MessageQueue"));
 		cfg.ConfigureEndpoints(ctx);
-		cfg.UseRateLimit(50, TimeSpan.FromSeconds(5));
+		cfg.UseRateLimit(10, TimeSpan.FromSeconds(1));
 		cfg.Durable = true;
 	});
 });

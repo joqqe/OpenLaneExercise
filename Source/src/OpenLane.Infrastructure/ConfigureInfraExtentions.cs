@@ -10,7 +10,7 @@ public static class ConfigureInfraExtentions
 {
 	public static IServiceCollection AddInfra(this IServiceCollection services, IConfiguration configuration)
 	{
-		services.AddDbContextFactory<AppDbContext>(options =>
+		services.AddDbContext<AppDbContext>(options =>
 		{
 			options.UseSqlServer(configuration.GetConnectionString("AppDB"));
 		});
@@ -20,7 +20,8 @@ public static class ConfigureInfraExtentions
 			options.Configuration = configuration.GetConnectionString("DistributedCache");
 		});
 
-		services.AddScoped<IIdempotencyService, IdempotencyService>();
+		services.AddTransient<IIdempotencyService, IdempotencyService>();
+		services.AddTransient<ILockService, LockService>();
 
 		return services;
 	}
