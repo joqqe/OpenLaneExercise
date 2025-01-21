@@ -1,5 +1,7 @@
 using MassTransit;
+using MassTransit.Middleware;
 using OpenLane.Common.Extensions;
+using OpenLane.Domain.Messages;
 using OpenLane.Infrastructure;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
@@ -44,15 +46,21 @@ builder.Services.AddMassTransit(config =>
 
 	config.AddConfigureEndpointsCallback((context, name, cfg) =>
 	{
-		cfg.UseMessageRetry(r => r.Incremental(5, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(10)));
+		if (name.Equals("bid-received"))
+		{
+			var partitioner = cfg.CreatePartitioner(10);
+			cfg.UsePartitioner<BidReceivedMessage>(partitioner, m => m.Message.OfferObjectId);
+		}
 	});
 
 	config.UsingRabbitMq((ctx, cfg) =>
 	{
 		cfg.Host(builder.Configuration.GetConnectionString("MessageQueue"));
 		cfg.ConfigureEndpoints(ctx);
-		cfg.UseRateLimit(10, TimeSpan.FromSeconds(1));
+		cfg.UseInMemoryOutbox(ctx);
 		cfg.Durable = true;
+		cfg.UseMessageRetry(r => r.Incremental(5, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(10)));
+		cfg.UseRateLimit(20, TimeSpan.FromSeconds(1));
 	});
 });
 

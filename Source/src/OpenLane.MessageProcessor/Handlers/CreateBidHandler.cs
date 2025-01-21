@@ -29,8 +29,8 @@ public class CreateBidHandler : IHandler<CreateBidCommand, Result<Bid>>
 	{
 		ArgumentNullException.ThrowIfNull(request);
 
-		var hasLock = await _lockService.AcquireLockAsync(nameof(CreateBidHandler), TimeSpan.FromSeconds(30),
-			60, TimeSpan.FromSeconds(1), cancellationToken);
+		var hasLock = await _lockService.AcquireLockAsync(nameof(CreateBidHandler), TimeSpan.FromSeconds(10),
+			100, TimeSpan.FromMilliseconds(100), cancellationToken);
 		
 		if (!hasLock)
 			return Result<Bid>.Failure("Lock couldn't be acquired");
