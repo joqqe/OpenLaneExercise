@@ -1,5 +1,4 @@
 using MassTransit;
-using MassTransit.Middleware;
 using OpenLane.Common.Extensions;
 using OpenLane.Domain.Messages;
 using OpenLane.Infrastructure;
