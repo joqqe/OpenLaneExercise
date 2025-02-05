@@ -1,4 +1,6 @@
 ﻿using MassTransit;
+using MassTransit.Transports;
+using Microsoft.AspNetCore.Mvc;
 using OpenLane.Common;
 using OpenLane.Common.Interfaces;
 using OpenLane.Domain;
@@ -14,15 +16,15 @@ public record PostBidResult(Result Result);
 public class PostBidHandler : IHandler<PostBidCommand, Result>
 {
 	private readonly ILogger<PostBidHandler> _logger;
-	private readonly IBus _bus;
+	private readonly IPublishEndpoint _publishEndpoint;
 
-	public PostBidHandler(ILogger<PostBidHandler> logger, IBus bus)
+	public PostBidHandler(ILogger<PostBidHandler> logger, IPublishEndpoint publishEndpoint)
 	{
 		ArgumentNullException.ThrowIfNull(logger);
-		ArgumentNullException.ThrowIfNull(bus);
+		ArgumentNullException.ThrowIfNull(publishEndpoint);
 
 		_logger = logger;
-		_bus = bus;
+		_publishEndpoint = publishEndpoint;
 	}
 
 	public async Task<Result> InvokeAsync(PostBidCommand request, CancellationToken cancellationToken = default)
@@ -30,7 +32,7 @@ public class PostBidHandler : IHandler<PostBidCommand, Result>
 		ArgumentNullException.ThrowIfNull(request);
 
 		var message = new BidReceivedMessage(request.IdempotencyKey, request.BidObjectId, request.OfferObjectId, request.Price, request.UserObjectId);
-		await _bus.Publish(message, cancellationToken);
+		await _publishEndpoint.Publish(message, cancellationToken);
 
 		_logger.LogInformation("Successfuly send bid accepted message.");
 

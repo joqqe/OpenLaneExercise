@@ -12,7 +12,7 @@ using OpenLane.ApiTests.Helpers;
 
 namespace OpenLane.ApiTests;
 
-[Collection("EnvironmenCollection")]
+[Collection(nameof(EnvironmentCollection))]
 public class ApiWebApplicationFactory : WebApplicationFactory<Program>
 {
 	public readonly Offer OpenOffer;

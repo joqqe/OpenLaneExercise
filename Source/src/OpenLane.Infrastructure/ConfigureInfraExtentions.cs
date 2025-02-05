@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OpenLane.Domain.Services;
+using OpenLane.Infrastructure.Factories;
 using OpenLane.Infrastructure.Services;
 using StackExchange.Redis;
 
@@ -28,14 +29,13 @@ public static class ConfigureInfraExtentions
 	{
 		// This complex setup is done, so AddRedisInstrumentation will produce trace logging.
 
-		var connectionStringDistributedCache = configuration.GetConnectionString("DistributedCache")!;
-		var connectionMultiplexer = (IConnectionMultiplexer)ConnectionMultiplexer.Connect(connectionStringDistributedCache);
-		
-		services.AddSingleton(connectionMultiplexer);
+		ConnectionMultiplexerFactory.Initialize(configuration);
+
+		services.AddSingleton(sp => ConnectionMultiplexerFactory.Instance());
 
 		services.AddStackExchangeRedisCache(options =>
 		{
-			options.ConnectionMultiplexerFactory = () => Task.FromResult(connectionMultiplexer);
+			options.ConnectionMultiplexerFactory = () => Task.FromResult(ConnectionMultiplexerFactory.Instance());
 		});
 
 		return services;

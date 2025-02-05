@@ -9,7 +9,7 @@ using OpenLane.Domain.Notifications;
 
 namespace OpenLane.ApiTests.Consumers;
 
-[Collection("EnvironmenCollection")]
+[Collection(nameof(EnvironmentCollection))]
 public class BidCreatedConsumerTests : IClassFixture<ApiWebApplicationFactory>
 {
 	private readonly ApiWebApplicationFactory _application;

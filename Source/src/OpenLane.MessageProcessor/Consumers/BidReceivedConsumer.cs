@@ -12,21 +12,21 @@ public class BidReceivedConsumer : IConsumer<BidReceivedMessage>
 
 	private readonly ILogger<BidReceivedConsumer> _logger;
 	private readonly CreateBidHandler _handler;
-	private readonly IBus _bus;
+	private readonly IPublishEndpoint _publishEndpoint;
 	private readonly IIdempotencyService _idempotencyService;
 
 	public BidReceivedConsumer(ILogger<BidReceivedConsumer> logger,
-		CreateBidHandler handler, IBus bus,
+		CreateBidHandler handler, IPublishEndpoint publishEndpoint,
 		IIdempotencyService idempotencyService)
 	{
 		ArgumentNullException.ThrowIfNull(logger);
 		ArgumentNullException.ThrowIfNull(handler);
-		ArgumentNullException.ThrowIfNull(bus);
+		ArgumentNullException.ThrowIfNull(publishEndpoint);
 		ArgumentNullException.ThrowIfNull(idempotencyService);
 
 		_logger = logger;
 		_handler = handler;
-		_bus = bus;
+		_publishEndpoint = publishEndpoint;
 		_idempotencyService = idempotencyService;
 	}
 
@@ -41,7 +41,7 @@ public class BidReceivedConsumer : IConsumer<BidReceivedMessage>
 				context.Message.BidObjectId,
 				string.Format("Duplicate message: {0}.", context.Message.IdempotencyKey),
 				context.Message.UserObjectId);
-			await _bus.Publish(createdFailedMessage);
+			await _publishEndpoint.Publish(createdFailedMessage);
 
 			_logger.LogWarning("Failed to consume {Consumer}: {Message}", nameof(BidReceivedConsumer), JsonSerializer.Serialize(context.Message));
 			return;
@@ -57,16 +57,16 @@ public class BidReceivedConsumer : IConsumer<BidReceivedMessage>
 				context.Message.BidObjectId,
 				result.Error ?? "Failed to create bid.",
 				context.Message.UserObjectId);
-			await _bus.Publish(createdFailedMessage);
+			await _publishEndpoint.Publish(createdFailedMessage);
 
 			_logger.LogWarning("Failed to consume {Consumer}: {Message}", nameof(BidReceivedConsumer), JsonSerializer.Serialize(context.Message));
 			return;
 		}
 
 		var createdMessage = new BidCreatedMessage(context.Message.IdempotencyKey, result.Value!.ObjectId, result.Value.Offer.ObjectId, result.Value.Price, result.Value.UserObjectId);
-		await _bus.Publish(createdMessage);
+		await _publishEndpoint.Publish(createdMessage);
 
-		await _idempotencyService.MarkRequestAsProcessedAsync(context.Message.IdempotencyKey.ToString(), IdempotencyTransaction);
+		await _idempotencyService.MarkRequestAsProcessedAsync(context.Message.IdempotencyKey.ToString(), IdempotencyTransaction, TimeSpan.FromMinutes(14_400));
 
 		_logger.LogInformation("Successfuly consumed {Consumer}: {Message}", nameof(BidReceivedConsumer), JsonSerializer.Serialize(context.Message));
 	}

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using MassTransit;
 using OpenLane.Domain.Services;
 using OpenLane.Common.Interfaces;
+using OpenLane.Api.Common.Attributes;
 
 namespace OpenLane.Api.Application.Bids.Post;
 
@@ -18,13 +19,11 @@ public class PostBidEndpoint : IEndpoint
 
 	public IEndpointRouteBuilder UseEndpoint(IEndpointRouteBuilder app)
 	{
-		app.MapPost(Instance, async (
+		app.MapPost(Instance, [Idempotency(IdempotencyTransaction, 14_400)] async (
 			[FromHeader(Name = "Idempotency-Key")] Guid idempotencyKey,
 			[FromServices] ILogger<Program> logger,
 			[FromServices] IValidator<PostBidRequest> validator,
 			[FromServices] PostBidHandler handler,
-			[FromServices] IBus bus,
-			[FromServices] IIdempotencyService idempotencyService,
 			CancellationToken cancellationToken,
 			HttpRequest httpRequest,
 			PostBidRequest request) =>
@@ -32,15 +31,6 @@ public class PostBidEndpoint : IEndpoint
 			ArgumentNullException.ThrowIfNull(logger);
 			ArgumentNullException.ThrowIfNull(validator);
 			ArgumentNullException.ThrowIfNull(handler);
-			ArgumentNullException.ThrowIfNull(bus);
-			ArgumentNullException.ThrowIfNull(idempotencyService);
-
-			if (await idempotencyService.IsRequestProcessedAsync(idempotencyKey!.ToString(), IdempotencyTransaction))
-			{
-				var errorMessage = string.Format("Duplicate request: {0}.", idempotencyKey!);
-				logger.LogWarning(errorMessage);
-				return Results.Conflict(errorMessage);
-			}
 
 			var problemDetails = await validator.GetProblemDetailsAsync(request, Instance, cancellationToken);
 			if (problemDetails is not null)
@@ -51,8 +41,6 @@ public class PostBidEndpoint : IEndpoint
 
 			var postBidRequest = new PostBidCommand(idempotencyKey, request.BidObjectId, request.OfferObjectId, request.Price, request.UserObjectId);
 			await handler.InvokeAsync(postBidRequest, cancellationToken);
-
-			await idempotencyService.MarkRequestAsProcessedAsync(idempotencyKey!.ToString(), IdempotencyTransaction);
 
 			logger.LogInformation("Successfuly send bid accepted.");
 

@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace OpenLane.MessageProcessorTests;
 
-[Collection("EnvironmenCollection")]
+[Collection(nameof(EnvironmentCollection))]
 public class MessageProcessorWebApplicationFactory : WebApplicationFactory<Program>
 {
 	public readonly Offer OpenOffer;

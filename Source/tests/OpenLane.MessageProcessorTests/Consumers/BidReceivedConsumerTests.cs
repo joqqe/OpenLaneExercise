@@ -8,7 +8,7 @@ using OpenLane.MessageProcessor.Consumers;
 
 namespace OpenLane.MessageProcessorTests.Consumers;
 
-[Collection("EnvironmenCollection")]
+[Collection(nameof(EnvironmentCollection))]
 public class BidReceivedConsumerTests : IClassFixture<MessageProcessorWebApplicationFactory>
 {
 	private readonly MessageProcessorWebApplicationFactory _application;

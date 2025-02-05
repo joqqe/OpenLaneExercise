@@ -20,11 +20,11 @@ public class IdempotencyService : IIdempotencyService
 		return value != null;
 	}
 
-	public async Task MarkRequestAsProcessedAsync(string key, string transaction)
+	public async Task MarkRequestAsProcessedAsync(string key, string transaction, TimeSpan expiration)
 	{
 		var options = new DistributedCacheEntryOptions
 		{
-			AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(4)
+			AbsoluteExpirationRelativeToNow = expiration
 		};
 
 		await _cache.SetStringAsync($"{key}--{transaction}", "processed", options);

@@ -43,7 +43,7 @@ public class BidCreatedFailedConsumer : IConsumer<BidCreatedFailedMessage>
 			.Group(context.Message.UserObjectId.ToString())
 			.SendAsync("BidCreatedFailed", notification);
 
-		await _idempotencyService.MarkRequestAsProcessedAsync(context.Message.IdempotencyKey.ToString(), IdempotencyTransaction);
+		await _idempotencyService.MarkRequestAsProcessedAsync(context.Message.IdempotencyKey.ToString(), IdempotencyTransaction, TimeSpan.FromMinutes(14_400));
 
 		_logger.LogInformation("Successfuly consumed {Consumer}: {Message}", nameof(BidCreatedFailedConsumer), JsonSerializer.Serialize(context.Message));
 

@@ -8,7 +8,7 @@ using System.Text.Json;
 
 namespace OpenLane.ApiTests.Endpoints;
 
-[Collection("EnvironmenCollection")]
+[Collection(nameof(EnvironmentCollection))]
 public class GetBidEndpointTests : IClassFixture<ApiWebApplicationFactory>
 {
 	private readonly HttpClient _client;

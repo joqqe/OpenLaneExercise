@@ -106,7 +106,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseMiddleware<IdempotencyCheckMiddleware>();
+app.UseMiddleware<IdempotencyMiddleware>();
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();

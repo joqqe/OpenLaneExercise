@@ -10,7 +10,7 @@ using System.Text.Json;
 
 namespace OpenLane.ApiTests.Endpoints;
 
-[Collection("EnvironmenCollection")]
+[Collection(nameof(EnvironmentCollection))]
 public class PostEndpointTests : IClassFixture<ApiWebApplicationFactory>
 {
 	private readonly HttpClient _client;

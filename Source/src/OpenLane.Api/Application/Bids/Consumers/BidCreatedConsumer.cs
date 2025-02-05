@@ -43,7 +43,7 @@ public class BidCreatedConsumer : IConsumer<BidCreatedMessage>
 			.Group(context.Message.UserObjectId.ToString())
 			.SendAsync("BidCreated", notification);
 
-		await _idempotencyService.MarkRequestAsProcessedAsync(context.Message.IdempotencyKey.ToString(), IdempotencyTransaction);
+		await _idempotencyService.MarkRequestAsProcessedAsync(context.Message.IdempotencyKey.ToString(), IdempotencyTransaction, TimeSpan.FromMinutes(14_400));
 
 		_logger.LogInformation("Successfuly consumed {Consumer}: {Message}", nameof(BidCreatedConsumer), JsonSerializer.Serialize(context.Message));
 	}
