@@ -100,7 +100,7 @@ public class PostEndpointTests : IClassFixture<ApiWebApplicationFactory>
 	}
 
 	[Fact]
-	public async Task PostBids_DoubleIdempotencyKey_ShouldReturn_400BadRequest()
+	public async Task PostBids_DoubleIdempotencyKey_ShouldReturn_409Conflict()
 	{
 		var harness = _application.Services.GetRequiredService<ITestHarness>();
 

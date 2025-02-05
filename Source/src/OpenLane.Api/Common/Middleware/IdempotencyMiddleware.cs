@@ -58,12 +58,18 @@ public class IdempotencyMiddleware
 				var errorMessage = string.Format("Duplicate request: {0}.", idempotencyKey!);
 				_logger.LogWarning(errorMessage);
 				await SetProblemDetails(context, errorMessage, StatusCodes.Status409Conflict);
+				return;
 			}
 
 			await _next(context);
 
-			await _idempotencyService.MarkRequestAsProcessedAsync(
-				idempotencyKey!.ToString(), idempotencyAttribute.TransactionKey, TimeSpan.FromMinutes(idempotencyAttribute.ExpirationInMinutes));
+			if (context.Response.StatusCode >= 200 && context.Response.StatusCode < 300)
+			{
+				await _idempotencyService.MarkRequestAsProcessedAsync(
+					idempotencyKey!.ToString(), idempotencyAttribute.TransactionKey, TimeSpan.FromMinutes(idempotencyAttribute.ExpirationInMinutes));
+			}
+
+			return;
 		}
 
 		await _next(context);
