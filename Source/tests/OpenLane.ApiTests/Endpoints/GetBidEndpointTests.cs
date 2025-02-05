@@ -3,6 +3,7 @@ using OpenLane.Api.Application.Bids.Get;
 using OpenLane.Api.Application.Dtos;
 using OpenLane.ApiTests.Environment;
 using OpenLane.ApiTests.Extensions;
+using OpenLane.ApiTests.TestData;
 using System.Net;
 using System.Text.Json;
 

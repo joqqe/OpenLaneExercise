@@ -5,6 +5,7 @@ using OpenLane.Api.Application.Bids.Get;
 using OpenLane.Api.Application.Bids.Post;
 using OpenLane.ApiTests.Environment;
 using OpenLane.ApiTests.Extensions;
+using OpenLane.ApiTests.TestData;
 using System.Net;
 using System.Text;
 using System.Text.Json;

@@ -1,10 +1,12 @@
 ﻿using MassTransit.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using OpenLane.Domain.Messages;
-using OpenLane.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using FluentAssertions;
 using OpenLane.MessageProcessor.Consumers;
+using OpenLane.MessageProcessorTests.Environment;
+using OpenLane.MessageProcessorTests.Extensions;
+using OpenLane.MessageProcessorTests.TestData;
 
 namespace OpenLane.MessageProcessorTests.Consumers;
 
@@ -22,13 +24,13 @@ public class BidReceivedConsumerTests : IClassFixture<MessageProcessorWebApplica
 	public async Task BidReceivedConsumer_Should_SaveBid_SendBidCreatedMessage()
 	{
 		var harness = _application.Services.GetRequiredService<ITestHarness>();
-		var serviceScopeFactory = _application.Services.GetRequiredService<IServiceScopeFactory>();
-		using var scope = serviceScopeFactory.CreateScope();
-		var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+		var objectMother = new ObjectMother();
+		await _application.SeedDatabaseAsync(objectMother);
+		var appDbContext = _application.GetAppDbContext();
 
 		// Arrange
 		var message = new BidReceivedMessage(
-			Guid.NewGuid(), Guid.NewGuid(), _application.OpenOffer.ObjectId, 120m, Guid.NewGuid());
+			Guid.NewGuid(), Guid.NewGuid(), objectMother.OpenOffer.ObjectId, 120m, Guid.NewGuid());
 
 		// Act
 		await harness.Bus.Publish(message);
@@ -55,12 +57,12 @@ public class BidReceivedConsumerTests : IClassFixture<MessageProcessorWebApplica
 	public async Task BidReceivedConsumer_ToLowePrice_Should_NotSaveBid_SendBidCreatedFailedMessage()
 	{
 		var harness = _application.Services.GetRequiredService<ITestHarness>();
-		var serviceScopeFactory = _application.Services.GetRequiredService<IServiceScopeFactory>();
-		using var scope = serviceScopeFactory.CreateScope();
-		var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+		var objectMother = new ObjectMother();
+		await _application.SeedDatabaseAsync(objectMother);
+		var appDbContext = _application.GetAppDbContext();
 
 		// Arrange
-		var message = new BidReceivedMessage(Guid.NewGuid(), Guid.NewGuid(), _application.OpenOffer.ObjectId, _application.Bid.Price - 1, Guid.NewGuid());
+		var message = new BidReceivedMessage(Guid.NewGuid(), Guid.NewGuid(), objectMother.OpenOffer.ObjectId, objectMother.Bid.Price - 1, Guid.NewGuid());
 
 		// Act
 		await harness.Bus.Publish(message);
@@ -83,12 +85,12 @@ public class BidReceivedConsumerTests : IClassFixture<MessageProcessorWebApplica
 	public async Task BidReceivedConsumer_InvalidIdempotencyKey_Should_NotSaveBid_SendBidCreatedFailedMessage()
 	{
 		var harness = _application.Services.GetRequiredService<ITestHarness>();
-		var serviceScopeFactory = _application.Services.GetRequiredService<IServiceScopeFactory>();
-		using var scope = serviceScopeFactory.CreateScope();
-		var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+		var objectMother = new ObjectMother();
+		await _application.SeedDatabaseAsync(objectMother);
+		var appDbContext = _application.GetAppDbContext();
 
 		// Arrange
-		var message = new BidReceivedMessage(Guid.Empty, Guid.NewGuid(), _application.OpenOffer.ObjectId, 120m, Guid.NewGuid());
+		var message = new BidReceivedMessage(Guid.Empty, Guid.NewGuid(), objectMother.OpenOffer.ObjectId, 120m, Guid.NewGuid());
 
 		// Act
 		await harness.Bus.Publish(message);
@@ -111,9 +113,9 @@ public class BidReceivedConsumerTests : IClassFixture<MessageProcessorWebApplica
 	public async Task BidReceivedConsumer_UnknownOffer_Should_NotSaveBid_SendBidCreatedFailedMessage()
 	{
 		var harness = _application.Services.GetRequiredService<ITestHarness>();
-		var serviceScopeFactory = _application.Services.GetRequiredService<IServiceScopeFactory>();
-		using var scope = serviceScopeFactory.CreateScope();
-		var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+		var objectMother = new ObjectMother();
+		await _application.SeedDatabaseAsync(objectMother);
+		var appDbContext = _application.GetAppDbContext();
 
 		// Arrange
 		var message = new BidReceivedMessage(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), 120m, Guid.NewGuid());
@@ -139,12 +141,12 @@ public class BidReceivedConsumerTests : IClassFixture<MessageProcessorWebApplica
 	public async Task BidReceivedConsumer_ClosedOffer_Should_NotSaveBid_SendBidCreatedFailedMessage()
 	{
 		var harness = _application.Services.GetRequiredService<ITestHarness>();
-		var serviceScopeFactory = _application.Services.GetRequiredService<IServiceScopeFactory>();
-		using var scope = serviceScopeFactory.CreateScope();
-		var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+		var objectMother = new ObjectMother();
+		await _application.SeedDatabaseAsync(objectMother); 
+		var appDbContext = _application.GetAppDbContext();
 
 		// Arrange
-		var message = new BidReceivedMessage(Guid.NewGuid(), Guid.NewGuid(), _application.ClosedOffer.ObjectId, 120m, Guid.NewGuid());
+		var message = new BidReceivedMessage(Guid.NewGuid(), Guid.NewGuid(), objectMother.ClosedOffer.ObjectId, 120m, Guid.NewGuid());
 
 		// Act
 		await harness.Bus.Publish(message);
@@ -167,12 +169,12 @@ public class BidReceivedConsumerTests : IClassFixture<MessageProcessorWebApplica
 	public async Task BidReceivedConsumer_FutureOffer_Should_NotSaveBid_SendBidCreatedFailedMessage()
 	{
 		var harness = _application.Services.GetRequiredService<ITestHarness>();
-		var serviceScopeFactory = _application.Services.GetRequiredService<IServiceScopeFactory>();
-		using var scope = serviceScopeFactory.CreateScope();
-		var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+		var objectMother = new ObjectMother();
+		await _application.SeedDatabaseAsync(objectMother);
+		var appDbContext = _application.GetAppDbContext();
 
 		// Arrange
-		var message = new BidReceivedMessage(Guid.NewGuid(), Guid.NewGuid(), _application.FutureOffer.ObjectId, 120m, Guid.NewGuid());
+		var message = new BidReceivedMessage(Guid.NewGuid(), Guid.NewGuid(), objectMother.FutureOffer.ObjectId, 120m, Guid.NewGuid());
 
 		// Act
 		await harness.Bus.Publish(message);
@@ -195,13 +197,13 @@ public class BidReceivedConsumerTests : IClassFixture<MessageProcessorWebApplica
 	public async Task BidReceivedConsumer_DoubleIdempotencyKey_Should_SaveBid_SendBidCreatedMessage()
 	{
 		var harness = _application.Services.GetRequiredService<ITestHarness>();
-		var serviceScopeFactory = _application.Services.GetRequiredService<IServiceScopeFactory>();
-		using var scope = serviceScopeFactory.CreateScope();
-		var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+		var objectMother = new ObjectMother();
+		await _application.SeedDatabaseAsync(objectMother);
+		var appDbContext = _application.GetAppDbContext();
 
 		// Arrange
 		var idempotencyKey = Guid.NewGuid();
-		var message = new BidReceivedMessage(idempotencyKey , Guid.NewGuid(), _application.OpenOffer.ObjectId, 120m, Guid.NewGuid());
+		var message = new BidReceivedMessage(idempotencyKey , Guid.NewGuid(), objectMother.OpenOffer.ObjectId, 120m, Guid.NewGuid());
 
 		// Act first message
 		await harness.Bus.Publish(message);

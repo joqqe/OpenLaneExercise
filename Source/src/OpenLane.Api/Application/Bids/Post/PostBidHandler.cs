@@ -1,6 +1,4 @@
 ﻿using MassTransit;
-using MassTransit.Transports;
-using Microsoft.AspNetCore.Mvc;
 using OpenLane.Common;
 using OpenLane.Common.Interfaces;
 using OpenLane.Domain;

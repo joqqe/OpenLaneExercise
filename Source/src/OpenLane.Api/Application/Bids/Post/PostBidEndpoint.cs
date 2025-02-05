@@ -2,8 +2,6 @@
 using OpenLane.Api.Application.Bids.Get;
 using OpenLane.Api.Common.Factories;
 using Microsoft.AspNetCore.Mvc;
-using MassTransit;
-using OpenLane.Domain.Services;
 using OpenLane.Common.Interfaces;
 using OpenLane.Api.Common.Attributes;
 

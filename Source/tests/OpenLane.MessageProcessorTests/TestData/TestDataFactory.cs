@@ -1,6 +1,6 @@
 ﻿using OpenLane.Domain;
 
-namespace OpenLane.MessageProcessorTests;
+namespace OpenLane.MessageProcessorTests.TestData;
 
 public static class TestDataFactory
 {

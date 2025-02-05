@@ -16,8 +16,8 @@ public static class ApiWebApplicationFactoryExtensions
 
 	public static async Task SeedDatabaseAsync(this ApiWebApplicationFactory application, ObjectMother objectMother)
 	{
-		var serviceProvider = application.Services.GetRequiredService<IServiceProvider>();
-		var scope = serviceProvider.CreateScope();
+		var serviceScopeFactory = application.Services.GetRequiredService<IServiceScopeFactory>();
+		using var scope = serviceScopeFactory.CreateScope();
 		var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
 		appDbContext.Offers.Add(objectMother.OpenOffer);

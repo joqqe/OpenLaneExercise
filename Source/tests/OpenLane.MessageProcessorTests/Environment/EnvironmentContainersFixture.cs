@@ -2,7 +2,7 @@
 using Testcontainers.RabbitMq;
 using Testcontainers.Redis;
 
-namespace OpenLane.MessageProcessorTests;
+namespace OpenLane.MessageProcessorTests.Environment;
 
 public class EnvironmentContainersFixture : IDisposable
 {
@@ -31,8 +31,8 @@ public class EnvironmentContainersFixture : IDisposable
 			RedisContainer.StopAsync()])
 			.GetAwaiter().GetResult();
 		Task.WhenAll([
-			MsSqlContainer.DisposeAsync().AsTask(), 
-			RabbitMqContainer.DisposeAsync().AsTask(), 
+			MsSqlContainer.DisposeAsync().AsTask(),
+			RabbitMqContainer.DisposeAsync().AsTask(),
 			RedisContainer.DisposeAsync().AsTask()])
 			.GetAwaiter().GetResult();
 	}
