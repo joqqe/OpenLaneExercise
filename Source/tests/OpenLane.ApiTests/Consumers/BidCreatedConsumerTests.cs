@@ -3,6 +3,8 @@ using MassTransit.Testing;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
 using OpenLane.Api.Application.Bids.Consumers;
+using OpenLane.ApiTests.Environment;
+using OpenLane.ApiTests.Extensions;
 using OpenLane.ApiTests.Helpers;
 using OpenLane.Domain.Messages;
 using OpenLane.Domain.Notifications;
@@ -13,26 +15,29 @@ namespace OpenLane.ApiTests.Consumers;
 public class BidCreatedConsumerTests : IClassFixture<ApiWebApplicationFactory>
 {
 	private readonly ApiWebApplicationFactory _application;
-	private readonly string _accessToken;
 
 	public BidCreatedConsumerTests(ApiWebApplicationFactory application)
 	{
+		ArgumentNullException.ThrowIfNull(application);
+
 		_application = application;
-		_accessToken = application.Services.GetRequiredService<AccessTokenProvider>()
-			.GetToken(_application.UserObjectId.ToString());
 	}
 
 	[Fact]
 	public async Task BidCreatedConsumer_Should_SendNotification()
 	{
+		var objectMother = new ObjectMother();
+		var accessToken = _application.GetAccessToken(objectMother.UserObjectId);
+		await _application.SeedDatabaseAsync(objectMother);
+
 		var connection = await SignalRHelper.CreateHubConnectionAsync(
-			_application, "http://127.0.0.1/api/notification", _accessToken);
+			_application, "http://127.0.0.1/api/notification", accessToken);
 		var harness = _application.Services.GetRequiredService<ITestHarness>();
 		var cancellationTokenSource = new CancellationTokenSource();
 
 		// Arrange
 		var message = new BidCreatedMessage(
-			Guid.NewGuid(),  Guid.NewGuid(), _application.OpenOffer.ObjectId, 120m, _application.UserObjectId);
+			Guid.NewGuid(),  Guid.NewGuid(), objectMother.OpenOffer.ObjectId, 120m, objectMother.UserObjectId);
 
 		BidCreatedNotification notification = default!; 
 		connection.On<BidCreatedNotification>("BidCreated", (message) =>
@@ -64,14 +69,18 @@ public class BidCreatedConsumerTests : IClassFixture<ApiWebApplicationFactory>
 	[Fact]
 	public async Task BidCreatedConsumer_DoubleIdempotencyKey_NotSendNotification()
 	{
+		var objectMother = new ObjectMother();
+		var accessToken = _application.GetAccessToken(objectMother.UserObjectId);
+		await _application.SeedDatabaseAsync(objectMother);
+
 		var connection = await SignalRHelper.CreateHubConnectionAsync(
-			_application, "http://127.0.0.1/api/notification", _accessToken);
+			_application, "http://127.0.0.1/api/notification", accessToken);
 		var harness = _application.Services.GetRequiredService<ITestHarness>();
 		var cancellationTokenSource = new CancellationTokenSource();
 
 		// Arrange
 		var message = new BidCreatedMessage(
-			Guid.NewGuid(), Guid.NewGuid(), _application.OpenOffer.ObjectId, 120m, _application.UserObjectId);
+			Guid.NewGuid(), Guid.NewGuid(), objectMother.OpenOffer.ObjectId, 120m, objectMother.UserObjectId);
 
 		BidCreatedNotification notification = default!;
 		connection.On<BidCreatedNotification>("BidCreated", (message) =>

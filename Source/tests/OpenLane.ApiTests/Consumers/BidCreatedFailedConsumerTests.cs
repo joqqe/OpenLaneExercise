@@ -3,6 +3,8 @@ using MassTransit.Testing;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
 using OpenLane.Api.Application.Bids.Consumers;
+using OpenLane.ApiTests.Environment;
+using OpenLane.ApiTests.Extensions;
 using OpenLane.ApiTests.Helpers;
 using OpenLane.Domain.Messages;
 using OpenLane.Domain.Notifications;
@@ -13,26 +15,29 @@ namespace OpenLane.ApiTests.Consumers;
 public class BidCreatedFailedConsumerTests : IClassFixture<ApiWebApplicationFactory>
 {
 	private readonly ApiWebApplicationFactory _application;
-	private readonly string _accessToken;
 
 	public BidCreatedFailedConsumerTests(ApiWebApplicationFactory application)
 	{
+		ArgumentNullException.ThrowIfNull(application);
+
 		_application = application;
-		_accessToken = application.Services.GetRequiredService<AccessTokenProvider>()
-			.GetToken(_application.UserObjectId.ToString());
 	}
 
 	[Fact]
 	public async Task BidCreatedFailedConsumer_Should_SendNotification()
 	{
+		var objectMother = new ObjectMother();
+		var accessToken = _application.GetAccessToken(objectMother.UserObjectId);
+		await _application.SeedDatabaseAsync(objectMother);
+
 		var connection = await SignalRHelper.CreateHubConnectionAsync(
-			_application, "http://127.0.0.1/api/notification", _accessToken);
+			_application, "http://127.0.0.1/api/notification", accessToken);
 		var harness = _application.Services.GetRequiredService<ITestHarness>();
 		var cancellationTokenSource = new CancellationTokenSource();
 
 		// Arrange
 		var message = new BidCreatedFailedMessage(
-			Guid.NewGuid(), Guid.NewGuid(), "Failed to create bid.", _application.UserObjectId);
+			Guid.NewGuid(), Guid.NewGuid(), "Failed to create bid.", objectMother.UserObjectId);
 
 		BidCreatedFailedNotification notification = default!;
 		connection.On<BidCreatedFailedNotification>("BidCreatedFailed", (message) =>
@@ -63,14 +68,18 @@ public class BidCreatedFailedConsumerTests : IClassFixture<ApiWebApplicationFact
 	[Fact]
 	public async Task BidCreatedFailedConsumer_DoubleIdempotencyKey_NotSendNotification()
 	{
+		var objectMother = new ObjectMother();
+		var accessToken = _application.GetAccessToken(objectMother.UserObjectId);
+		await _application.SeedDatabaseAsync(objectMother);
+
 		var connection = await SignalRHelper.CreateHubConnectionAsync(
-			_application, "http://127.0.0.1/api/notification", _accessToken);
+			_application, "http://127.0.0.1/api/notification", accessToken);
 		var harness = _application.Services.GetRequiredService<ITestHarness>();
 		var cancellationTokenSource = new CancellationTokenSource();
 
 		// Arrange
 		var message = new BidCreatedFailedMessage(
-			Guid.NewGuid(), Guid.NewGuid(), "Failed to create bid.", _application.UserObjectId);
+			Guid.NewGuid(), Guid.NewGuid(), "Failed to create bid.", objectMother.UserObjectId);
 
 		BidCreatedFailedNotification notification = default!;
 		connection.On<BidCreatedFailedNotification>("BidCreatedFailed", (message) =>

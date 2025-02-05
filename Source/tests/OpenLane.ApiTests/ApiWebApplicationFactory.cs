@@ -4,34 +4,22 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using OpenLane.Domain;
 using OpenLane.Infrastructure;
 using MassTransit;
 using OpenLane.Api.Application.Bids.Consumers;
 using OpenLane.ApiTests.Helpers;
+using OpenLane.ApiTests.Environment;
 
 namespace OpenLane.ApiTests;
 
 [Collection(nameof(EnvironmentCollection))]
 public class ApiWebApplicationFactory : WebApplicationFactory<Program>
 {
-	public readonly Offer OpenOffer;
-	public readonly Offer ClosedOffer;
-	public readonly Offer FutureOffer;
-	public readonly Bid Bid;
-	public readonly Guid UserObjectId;
 	private readonly EnvironmentContainersFixture _environmentContainers;
 
 	public ApiWebApplicationFactory(EnvironmentContainersFixture environmentContainers)
 	{
 		_environmentContainers = environmentContainers;
-
-		OpenOffer = TestDataFactory.CreateOpenOffer();
-		ClosedOffer = TestDataFactory.CreateClosedOffer();
-		FutureOffer = TestDataFactory.CreateFutureOffer();
-		Bid = TestDataFactory.CreateBid(OpenOffer);
-
-		UserObjectId = Guid.NewGuid();
 	}
 
 	protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -74,18 +62,6 @@ public class ApiWebApplicationFactory : WebApplicationFactory<Program>
 			var appDbContext = scopedServices.GetRequiredService<AppDbContext>();
 
 			appDbContext.Database.EnsureCreated();
-
-			SeedDatabase(appDbContext);
 		});
-	}
-
-	private void SeedDatabase(AppDbContext appDbContext)
-	{
-		appDbContext.Offers.Add(OpenOffer);
-		appDbContext.Offers.Add(ClosedOffer);
-		appDbContext.Offers.Add(FutureOffer);
-		appDbContext.Bids.Add(Bid);
-
-		appDbContext.SaveChanges();
 	}
 }
