@@ -29,7 +29,7 @@ public class PostBidHandler : IHandler<PostBidCommand, Result>
 	{
 		ArgumentNullException.ThrowIfNull(request);
 
-		var message = new BidReceivedMessage(request.IdempotencyKey, request.BidObjectId, request.OfferObjectId, request.Price, request.UserObjectId);
+		var message = new BidReceivedMessage(request.BidObjectId, request.OfferObjectId, request.Price, request.UserObjectId);
 		await _publishEndpoint.Publish(message, cancellationToken);
 
 		_logger.LogInformation("Successfuly send bid accepted message.");
